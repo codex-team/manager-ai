@@ -1,28 +1,10 @@
 # Codex Manager bot
 
 The main idea of this project is an increasing of projects performance inside of a little team. 
- 
-## Quick start
- 
-1. Clone repo & create virtual environment & install dependencies
-
-       ~/path/to$ git clone https://github.com/SunnyCapt/manager-ai.git && cd manager-ai 
-       ~/path/to/manager-ai$ sudo pip3 install virtualenv
-       ~/path/to/manager-ai$ virtualenv venv
-       ~/path/to/manager-ai$ source venv/bin/activate
-       ~/path/to/manager-ai$ pip install -r requirements.txt
-       ~/path/to/manager-ai$ pip install -r requirements.txt
-       ~/path/to/manager-ai$ apt-get install redis-server -y
-       ~/path/to/manager-ai$ sudo systemctl enable redis
-       
-2. Launch tasks
-    
-       ~/path/to/manager-ai$ celery -A tasks worker -l info
-       ~/path/to/manager-ai$ celery -A tasks beat -l info
        
 ## About project structure
 
-* tasks.py - main script. It starts checking and notifying.
+* tasks.py - entry point
 * services.py - application logic
 * settings.py - public project settings
 * local_settings.py - hidden project settings
@@ -46,4 +28,7 @@ The main idea of this project is an increasing of projects performance inside of
             'mess2'
             'messN'
         # recipients only for this task
-        recipients: ['szzszdf', 'asdfsd', 'sdfsdfs']
+        recipients:
+            'szzszdf'
+            'asdfsd'
+            'sdfsdfs'

@@ -1,14 +1,12 @@
+from os import path
 from logging.config import dictConfig
 from typing import Dict
 
-# Celery Configuration
-CELERY_BROKER_URL = 'redis://localhost:6379/2'
-CELERY_RESULT_BACKEND = 'redis://localhost'
-
+# set it in local_settings.py
 PROXY: Dict[str] = None
 
 # File path with specified tasks
-TASKS_FILE_PATH = None
+TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), 'tasks.txt')
 
 LOGGING = {
     'version': 1,
@@ -25,10 +23,10 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
-        'celery': {
+        'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'celery.log',
+            'filename': 'tmp/log.log',
             'formatter': 'simple',
             'maxBytes': 1024 * 1024 * 100,
         },
@@ -42,7 +40,7 @@ LOGGING = {
 }
 
 try:
-    from local_settings import *
+    from .local_settings import *
 except ImportError:
     pass
 
