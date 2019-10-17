@@ -3,6 +3,6 @@ services:
   m-ai:
     build: .
     container_name: m-ai
-    command: celery -A tasks worker -l info
+    command: python tasks
 volumes:
   tmp:tmp

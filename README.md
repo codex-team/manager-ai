@@ -1,13 +1,17 @@
 # Codex Manager bot
 
 The main idea of this project is an increasing of projects performance inside of a little team. 
-       
+
+## Quick start
+ 1) create config/local_settings.py file and set the necessary configs in it
+ 2) install requirements and start script or just launch the docker container
+
 ## About project structure
 
 * tasks.py - entry point
-* services.py - application logic
-* settings.py - public project settings
-* local_settings.py - hidden project settings
+* config.settings.py - public project settings
+* config.local_settings.py - hidden project settings
+* tmp - directory for logs and other temp files
 
 ## Default structure of file with tasks
 
