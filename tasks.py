@@ -46,19 +46,25 @@ def process(serialized_task: Dict[list, str, int, "etc"]):
         logger.exception(f"Failed to complete task <{hash(serialized_task)}>: {e}")
 
 
-def add_tasks(tasks_with_cron: List[Tuple["task wrapper", Dict["cron fields"]]]):
-    for task, cron in Service.get_tasks():
+def add_tasks(task: "task wrapper", cron: Dict["cron fields"]):
         serialized_task = Service.serialize_task(task)
-        scheduler.add_job(process, 'cron', args=[serialized_task], replace_existing=True, **cron)
+        scheduler.add_job(process, "cron", args=[serialized_task], replace_existing=True, **cron)
         logger.info(f"Added new periodic task: #{task.name}")
 
 
-if __name__ == "__main__":
+def run():
+    logger.info(f"Run manager-ai")
     tasks_with_cron = Service.get_tasks()
     # TODO: implement a lambda func that selects only new tasks
     tasks_with_cron = filter(lambda task_with_cron: task_with_cron, tasks_with_cron)
-    add_tasks(tasks_with_cron)
+    logger.info(f"Found {len(tasks_with_cron)} new tasks in {TASKS_FILE_PATH}")
+    for task, cron in tasks_with_cron:
+        add_tasks(task, cron)
     try:
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
         pass
+
+
+if __name__ == "__main__":
+    run()
