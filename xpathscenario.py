@@ -64,9 +64,14 @@ class XPathScenario:
 
     @staticmethod
     def get_hash(string) -> str:
-        """Returns md5 hash of the given string."""
+        """Returns md5 hash of the given string / byte sequence."""
 
-        return make_hash(bytes(string, "utf-8")).hexdigest()
+        if type(string) is str:
+            string = bytes(string, "utf-8")
+        elif type(string) is not bytes:
+            raise TypeError("Illegal argument given.")
+
+        return make_hash(string).hexdigest()
 
     def __read_json(self) -> dict:
         """Loads timestamp data from DEFAULT_TIMESTAMPS_FILE."""
@@ -111,7 +116,9 @@ class XPathScenario:
         # if a timestamps file doesn't exist, create one and
         # write the first timestamp into it
         if not path.exists(self.DEFAULT_TIMESTAMPS_FILE):
-            self.__write_json({timestamp})
+            with open(self.DEFAULT_TIMESTAMPS_FILE, 'w') as timestamps_file:
+                timestamps_file.write("{ \"" + self.timestamp_key + "\": "
+                                      + json.dumps(timestamp) + " }")
             return
 
         timestamps_dict = self.__read_json()
