@@ -1,8 +1,11 @@
 import requests
 
 
+# method for delivering a message in telegram
 def transport_telegram(message, webhook):
-    requests.post(webhook, data={"message": message.encode('utf-8')})
-
-
-transport_telegram('Мяу', 'https://notify.bot.codex.so/u/H97FIRDA')
+    try:
+        requests.post(webhook, data={"message": message})  # sending the message by webhook
+        return True
+    except ValueError:
+        print('Wrong webhook')
+        return False
