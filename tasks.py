@@ -37,7 +37,7 @@ class Service:
 
 
 def process(serialized_task: Dict[list, str, int, "etc"]):
-    """Task processing"""
+    """Execute scenario"""
     task: "task wrapper" = Service.deserialize_task(serialized_task)
     logger.info(f"Started task processing <{hash(serialized_task)}>")
     try:
@@ -47,9 +47,10 @@ def process(serialized_task: Dict[list, str, int, "etc"]):
 
 
 def add_tasks(task: "task wrapper", cron: Dict["cron fields"]):
-        serialized_task = Service.serialize_task(task)
-        scheduler.add_job(process, "cron", args=[serialized_task], replace_existing=True, **cron)
-        logger.info(f"Added new periodic task: #{task.name}")
+    """Add task to scheduler"""
+    serialized_task = Service.serialize_task(task)
+    scheduler.add_job(process, "cron", args=[serialized_task], replace_existing=True, **cron)
+    logger.info(f"Added new periodic task: #{task.name}")
 
 
 def run():
