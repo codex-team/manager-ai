@@ -8,7 +8,7 @@ def retry_if_connection_error(exception):
     return isinstance(exception, requests.exceptions.ConnectionError)
 
 
-# retry if Connecting or timeout error for 3 time
+# retry if ConnectingError error for 3 time
 @retry(retry_on_exception=retry_if_connection_error, stop_max_attempt_number=3)
 def transport_telegram(message, webhook):
     """
