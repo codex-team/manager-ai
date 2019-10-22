@@ -1,4 +1,5 @@
 import random
+
 from messages import *
 
 """ A function that creates new notification using user-config 
@@ -8,7 +9,7 @@ from messages import *
 """
 
 
-def create_message(user_config):
+def create_message(user_config) -> str:
     content = {
         'days_count': user_config['days_count'],
         'evil_emoji': random.choice(EVIL_EMOJI),
@@ -18,12 +19,3 @@ def create_message(user_config):
     message = message.format(**content)
     return message
 
-
-# Test driver
-if __name__ == '__main__':
-    for _ in range(10):
-        user_conf = {
-            'days_count': random.randrange(1, 10),
-            'first_time': random.choice([True, False]),
-        }
-        print(create_message(user_conf))
