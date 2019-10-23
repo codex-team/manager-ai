@@ -1,4 +1,5 @@
 import json
+import logging
 from os import path
 from datetime import datetime
 from hashlib import md5 as make_hash
@@ -30,27 +31,34 @@ class XPathScenario:
         self.proxies = params.get('proxies')
         self.timestamp_key: str = self.get_hash(self.url + self.xpath)
 
-    def get_html_element_by_xpath(self):
-        """Makes a GET request to the {self.url}. Searches for an html element by
+    def get_element(self, document):
+        """Searches for an html element in {document} by
         its xpath and returns its string representation.
         """
 
-        try:
-            response = requests.get(self.url, proxies=self.proxies).text
-        except requests.RequestException as e:
-            # logging.error("Request error: {}".format(e))
-            # TODO: exception handling
-            return None
-
-        tree = html.fromstring(response)
+        tree = html.fromstring(document)
         try:
             elem_lst = tree.xpath(self.xpath)
         except Exception as e:
-            # logging.error("XPathError: {}".format(e))
+            logging.error("XPathError: {}".format(e))
             # TODO: exception handling
             return None
 
         return html.tostring(elem_lst[0])
+
+    def get_page_content(self, url=None):
+        """Makes a GET request to the {self.url} or
+        to the {url} if specified."""
+
+        url = url if url else self.url
+        try:
+            response = requests.get(url, proxies=self.proxies)
+        except requests.RequestException as e:
+            logging.error("Request error: {}".format(e))
+            # TODO: exception handling
+            return None
+
+        return response.text
 
     # def checkout_timestamp(self, element_info: dict):
     #     # get date of the last change
@@ -102,7 +110,8 @@ class XPathScenario:
 
         """
 
-        searched_element = self.get_html_element_by_xpath()
+        page_content = self.get_page_content()
+        searched_element = self.get_element(page_content)
 
         # if nothing is found
         if not searched_element:
