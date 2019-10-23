@@ -3,11 +3,7 @@
 The main idea of this project is an increasing of projects performance inside of a little team. 
 
 ## Quick start
- 1) create config/local_settings.py file and set or redefine_default configs in it
-    ```python
-    # sample config/local_settings.py
-    PROXY = {"http": "socks5://127.0.0.1:9050", "https": "socks5://127.0.0.1:9050"}
-    ```
+ 1) create config/local_settings.py file (check config/local_settings.sample) and set or redefine_default configs in it
  2) install requirements and start script or just launch the docker container
 
 ## About project structure
