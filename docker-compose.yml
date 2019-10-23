@@ -2,7 +2,5 @@ version: '3'
 services:
   m-ai:
     build: .
-    container_name: m-ai
     command: python tasks
-volumes:
-  tmp:tmp
+

@@ -1,3 +1,4 @@
+import sys
 from logging.config import dictConfig
 from os import path
 from typing import Dict
@@ -31,27 +32,21 @@ LOGGING = {
     "disable_existing_loggers": True,
     "formatters": {
         "simple": {
-            "format": "%(levelname)s %(message)s",
+            "format": "(%(process)d) %(asctime)s %(name)s (line %(lineno)s) %(levelname)s %(message)s",
             "datefmt": "%y %b %d, %H:%M:%S",
         },
     },
     "handlers": {
-        "console": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "simple"
-        },
-        "file": {
-            "level": "INFO",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": "tmp/log.log",
-            "formatter": "simple",
-            "maxBytes": 1024 * 1024 * 100,
+        'console_stderr': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+            'formatter': 'simple',
+            'stream': sys.stderr
         },
     },
     "loggers": {
         "general": {
-            "handlers": ["celery", "console"],
+            "handlers": ["console_stderr"],
             "level": "INFO",
         },
     }
