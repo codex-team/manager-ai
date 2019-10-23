@@ -25,4 +25,3 @@ def transport_telegram(message, webhook):
     except requests.exceptions.ConnectionError:
         logging.error("Connection Error")
     return False
-

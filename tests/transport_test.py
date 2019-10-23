@@ -9,7 +9,7 @@ class TestTransportTelegram(unittest.TestCase):
     """
     def setUp(self):  # test preparation method
         def request_callback(request, uri, response_headers):  # what answer is right
-            ok = request.body == b"message=Test+telegram+transport"
+            ok = request.parsed_body["message"][0] == "Test telegram transport"
             self.assertEqual(ok, True)
             return [200, response_headers, "OK" if ok else "ERROR"]
         httpretty.enable()
