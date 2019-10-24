@@ -1,6 +1,6 @@
 import random
 
-from messages import *
+from .messages_templates import FIRST_TIME_MESSAGES, SECOND_TIME_MESSAGES, EVIL_EMOJI, SAD_EMOJI
 
 """ A function that creates new notification using user-config 
     user-config should contain:
@@ -15,7 +15,6 @@ def create_message(user_config) -> str:
         'evil_emoji': random.choice(EVIL_EMOJI),
         'sad_emoji': random.choice(SAD_EMOJI),
     }
-    message = random.choice([FIRST_TIME_MESSAGES, SECOND_TIME_MESSAGES][not user_config['first_time']])
+    message = random.choice(FIRST_TIME_MESSAGES if user_config['first_time'] else SECOND_TIME_MESSAGES)
     message = message.format(**content)
     return message
-
