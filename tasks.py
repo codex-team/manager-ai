@@ -1,6 +1,8 @@
 from logging import getLogger
 from typing import Tuple, List
+
 from apscheduler.schedulers.blocking import BlockingScheduler
+
 from config.settings import *
 
 logger = getLogger("general")

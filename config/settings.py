@@ -37,11 +37,11 @@ LOGGING = {
         },
     },
     "handlers": {
-        'console_stderr': {
-            'class': 'logging.StreamHandler',
-            'level': 'INFO',
-            'formatter': 'simple',
-            'stream': sys.stderr
+        "console_stderr": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "stream": sys.stderr
         },
     },
     "loggers": {
