@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from message_creator import create_message
+from manager_ai.core.messages.message_creator import create_message
 
 
 class TestMessageCreator(unittest.TestCase):
