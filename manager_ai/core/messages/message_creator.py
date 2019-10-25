@@ -1,6 +1,6 @@
 import random
 
-from .messages_templates import FIRST_TIME_MESSAGES, SECOND_TIME_MESSAGES, EVIL_EMOJI, SAD_EMOJI
+from .message_templates import FIRST_TIME_MESSAGES, SECOND_TIME_MESSAGES, EVIL_EMOJI, SAD_EMOJI
 
 """ A function that creates new notification using user-config 
     user-config should contain:

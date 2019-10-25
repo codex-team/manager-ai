@@ -8,7 +8,7 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from pytz import utc
 
 # set it in local_settings.py
-PROXY: Dict[str] = None
+PROXY: Dict[str]
 
 # File path with specified tasks
 TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), "tasks.txt")
