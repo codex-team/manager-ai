@@ -16,7 +16,7 @@ TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), 
 # default apscheduler config
 SCHEDULER = {
     "jobstores": {
-        "default": MongoDBJobStore(database='scheduler', collection='jobs', host='mongodb', port=27017)
+        "default": MongoDBJobStore(database="scheduler", collection="jobs", host="mongodb", port=27017)
     }, "executors": {
         "default": {"type": "threadpool", "max_workers": 20},
         "processpool": ProcessPoolExecutor(max_workers=5)
