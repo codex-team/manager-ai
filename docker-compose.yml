@@ -3,4 +3,7 @@ services:
   m-ai:
     build: .
     command: python tasks
-
+    links:
+      - mongodb
+  mongodb:
+      image: mvertes/alpine-mongo:4.0.6-1
