@@ -15,8 +15,7 @@ class TestTransportTelegram(unittest.TestCase):
             return [200, response_headers, "OK" if ok else "ERROR"]
 
         httpretty.enable()
-        httpretty.register_uri(httpretty.POST, "http://transport_test.com/",
-                               body=request_callback)  # register fake http with request_callback
+        httpretty.register_uri(httpretty.POST, "http://transport_test.com/", body=request_callback)  # register fake http with request_callback
 
     def tearDown(self):  # final test method
         httpretty.reset()
