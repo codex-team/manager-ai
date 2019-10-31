@@ -1,1 +1,1 @@
-__all__ = ['local_settings', 'settings']
+__all__ = ["local_settings", "settings"]
