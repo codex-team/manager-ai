@@ -14,7 +14,7 @@ class Service:
     """Set of class/static methods for various purposes"""
 
     @classmethod
-    def get_tasks(cls) -> List[Tuple["task wrapper", Dict["cron fields"]]]:
+    def get_tasks(cls) -> List[Tuple["task_wrapper", Dict["cron_field_name", "value"]]]:
         """Parse the task file,
         wrap it in a wrapper class, create a crontab
         and return a list with tuples that contain
@@ -27,7 +27,7 @@ class Service:
         raise NotImplementedError()
 
     @classmethod
-    def serialize_task(cls, task: "task wrapper") -> Dict[list, str, int, "etc"]:
+    def serialize_task(cls, task: "task wrapper") -> Dict[str, list or str or int or "etc"]:
         """Convert the task object
         to an object consisting of primitive types"""
         raise NotImplementedError()
@@ -38,7 +38,7 @@ class Service:
         raise NotImplementedError()
 
 
-def process(serialized_task: Dict[list, str, int, "etc"]):
+def process(serialized_task: Dict[str, list or str or int or "etc"]):
     """Execute scenario"""
     task: "task wrapper" = Service.deserialize_task(serialized_task)
     logger.info(f"Started task processing <{hash(serialized_task)}>")
@@ -48,7 +48,7 @@ def process(serialized_task: Dict[list, str, int, "etc"]):
         logger.exception(f"Failed to complete task <{hash(serialized_task)}>: {e}")
 
 
-def add_tasks(task: "task wrapper", cron: Dict["cron fields"]):
+def add_tasks(task: "task wrapper", cron: Dict["cron_field_name", "value"]):
     """Add task to scheduler"""
     serialized_task = Service.serialize_task(task)
     scheduler.add_job(process, "cron", args=[serialized_task], replace_existing=True, **cron)
@@ -59,7 +59,7 @@ def run():
     logger.info(f"Run manager-ai")
     tasks_with_cron = Service.get_tasks()
     # TODO: implement a lambda func that selects only new tasks
-    tasks_with_cron = filter(lambda task_with_cron: task_with_cron, tasks_with_cron)
+    tasks_with_cron = list(filter(lambda task_with_cron: task_with_cron, tasks_with_cron))
     logger.info(f"Found {len(tasks_with_cron)} new tasks in {TASKS_FILE_PATH}")
     for task, cron in tasks_with_cron:
         add_tasks(task, cron)

@@ -17,13 +17,12 @@ class TestTransportTelegram(unittest.TestCase):
             return [200, response_headers, "OK" if ok else "ERROR"]
 
         httpretty.enable()
-        httpretty.register_uri(httpretty.POST, 'http://transport_test.com/',
-                               body=request_callback)  # register fake http with request_callback
+        httpretty.register_uri(httpretty.POST, "http://transport_test.com/", body=request_callback)  # register fake http with request_callback
 
     def tearDown(self):  # final test method
         httpretty.reset()
         httpretty.disable()
 
     def test_first(self):
-        response = transport_telegram('Test telegram transport', "http://transport_test.com/")
+        response = transport_telegram("Test telegram transport", "http://transport_test.com/")
         self.assertEqual(response, True)

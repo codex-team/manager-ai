@@ -21,7 +21,7 @@ def transport_telegram(message, webhook):
         requests.post(webhook, data={"message": message}, timeout=10)  # sending the message by webhook
         return True
     except ValueError:
-        logging.error('Wrong webhook')
+        logging.error("Wrong webhook")
         return False
     except requests.exceptions.ConnectionError:
         logging.error("Connection Error")
