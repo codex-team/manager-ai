@@ -1,6 +1,7 @@
+import logging
+
 import requests
 from retrying import retry
-import logging
 
 
 def retry_if_connection_error(exception):
