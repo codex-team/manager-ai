@@ -1,18 +1,22 @@
-# Byte-compiled / optimized
+# Byte-compiled / optimized / DLL files
+
 __pycache__/
 *.py[cod]
 *$py.class
 
 # Project stuff:
 *.log
-*local_settings.py
+local_settings.py
 
 # Environments
 .env
 .venv
 env/
 venv/
+ENV/
+env.bak/
+venv.bak/
 
-# ide
+# IDE
 .idea
 .trash

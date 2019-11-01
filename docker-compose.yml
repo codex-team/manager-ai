@@ -1,6 +1,9 @@
-version: '3'
+version: "3"
 services:
   m-ai:
     build: .
     command: python tasks
-
+    links:
+      - mongodb
+  mongodb:
+    image: mongo:4.2

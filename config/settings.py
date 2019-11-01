@@ -4,20 +4,24 @@ from os import path
 from typing import Dict
 
 from apscheduler.executors.pool import ProcessPoolExecutor
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.jobstores.mongodb import MongoDBJobStore
+from pymongo import MongoClient
 from pytz import utc
 
 # set it in local_settings.py
-PROXY: Dict[str] = None
+PROXY: Dict[str, str]
 
 # File path with specified tasks
-TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), "tasks.txt")
+TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), "tasks.yml")
+
+# mongoDB setup
+MONGO_CLIENT = MongoClient(host=MongoClient.HOST, port=MongoClient.PORT)
+DATABASE_NAME = "manager"
 
 # default apscheduler config
 SCHEDULER = {
     "jobstores": {
-        "mongo": {"type": "mongodb"},
-        "default": SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")
+        "default": MongoDBJobStore(database=DATABASE_NAME, collection="jobs", client=MONGO_CLIENT)
     }, "executors": {
         "default": {"type": "threadpool", "max_workers": 20},
         "processpool": ProcessPoolExecutor(max_workers=5)
