@@ -40,7 +40,7 @@ def get_tasks() -> List[Tuple[TaskWrapper, Dict["cron fields"]]]:
     and return a list with tuples that contain
     the wrapped task and crontab"""
     data = None
-    with open(TASKS_FILE_PATH, 'r') as file:
+    with open(TASKS_FILE_PATH, "r") as file:
         data = load(file)
     if not data:
         logger.exception(f"Wrong tasks structure in {TASKS_FILE_PATH}")
@@ -54,7 +54,7 @@ def get_tasks() -> List[Tuple[TaskWrapper, Dict["cron fields"]]]:
     for src in src_tasks:
         cron = re.fullmatch(
             " *" + 4 * "([0-9\*/,a-z]*) +" + "([0-9\*/,a-z]*) *",
-            src.get("schedule", ''),
+            src.get("schedule", ""),
             flags=re.IGNORECASE
         )
 
