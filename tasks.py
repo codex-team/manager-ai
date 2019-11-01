@@ -69,7 +69,7 @@ def get_tasks() -> List[Tuple[TaskWrapper, Dict["cron fields"]]]:
     return tasks
 
 
-def process(serialized_task: Dict[list, str, int, "etc"]):
+def process(serialized_task: Dict[str, list or str or int or "etc"]):
     """Execute scenario"""
     task: TaskWrapper = TaskWrapper.deserialize(serialized_task)
     logger.info(f"Started task processing <{hash(serialized_task)}>")
@@ -90,7 +90,7 @@ def run():
     logger.info(f"Run manager-ai")
     tasks_with_cron = Service.get_tasks()
     # TODO: implement a lambda func that selects only new tasks
-    tasks_with_cron = filter(lambda task_with_cron: task_with_cron, tasks_with_cron)
+    tasks_with_cron = list(filter(lambda task_with_cron: task_with_cron, tasks_with_cron))
     logger.info(f"Found {len(tasks_with_cron)} new tasks in {TASKS_FILE_PATH}")
     for task, cron in tasks_with_cron:
         add_tasks(task, cron)

@@ -4,11 +4,11 @@ from os import path
 from typing import Dict
 
 from apscheduler.executors.pool import ProcessPoolExecutor
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.jobstores.mongodb import MongoDBJobStore
 from pytz import utc
 
 # set it in local_settings.py
-PROXY: Dict[str] = None
+PROXY: Dict[str, str] = None
 
 # File path with specified tasks
 TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), "tasks.yml")
@@ -16,8 +16,7 @@ TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), 
 # default apscheduler config
 SCHEDULER = {
     "jobstores": {
-        "mongo": {"type": "mongodb"},
-        "default": SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")
+        "default": MongoDBJobStore(database="scheduler", collection="jobs", host="mongodb", port=27017)
     }, "executors": {
         "default": {"type": "threadpool", "max_workers": 20},
         "processpool": ProcessPoolExecutor(max_workers=5)
