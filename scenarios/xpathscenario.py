@@ -9,24 +9,35 @@ from config.settings import MONGO_CLIENT, DATABASE_NAME
 
 
 class XPathScenario:
+    """
+    <Writing general description in progress...>
+
+    It uses MongoDB to store data:
+        Elements and their timestamps are stored as a document in xpath_collection
+        (config.settings.DATABASE_NAME.xpath_collection).
+
+        Sample document in xpath_collection:
+
+            {
+                '_id': '<hashed (url+xpath)>',
+                'element': '<hashed_element>',
+                'timestamp': <datetime>
+            }
+
+        Hashes are used to make strings shorter.
+    """
 
     # mongoDB collection where elements and their timestamps are stored
     XPATH_COLLECTION = MONGO_CLIENT[DATABASE_NAME]["xpath_collection"]
 
-    """Sample document in xpath_collection:
-    
-    {
-        '_id': '<hashed (url+xpath)>', 
-        'element': '<hashed_element>',
-        'timestamp': <datetime>
-    }
-    
-    Hashes are used to make strings shorter.
-    """
-
     def __init__(self, params: dict):
-        self.url = params['url']
-        self.xpath = params['xpath']
+        try:
+            self.url = params['url']
+            self.xpath = params['xpath']
+        except (KeyError, TypeError):
+            raise TypeError("Illegal initial argument given. Expected 'dict' "
+                            "with keys 'url' and 'xpath'.")
+
         self.proxies = params.get('proxies')
         self.timestamp_key: str = self.__get_hash(self.url + self.xpath)
 
@@ -38,12 +49,12 @@ class XPathScenario:
         tree = html.fromstring(document)
         try:
             elem_lst = tree.xpath(self.xpath)
-        except Exception as e:
-            logging.error("XPathError: {}".format(e))
+        except Exception:
+            logging.exception("XPathError")
             # TODO: exception handling
             return None
 
-        return html.tostring(elem_lst[0]) if elem_lst else None
+        return html.tostring(elem_lst[0]).decode().strip() if elem_lst else None
 
     def get_page_content(self, url=None):
         """Makes a GET request to the {self.url} or
@@ -52,8 +63,8 @@ class XPathScenario:
         url = url if url else self.url
         try:
             response = requests.get(url, proxies=self.proxies)
-        except requests.RequestException as e:
-            logging.error("Request error: {}".format(e))
+        except requests.RequestException:
+            logging.exception("Request error")
             # TODO: exception handling
             return None
 
@@ -85,14 +96,20 @@ class XPathScenario:
 
         1. Searches for an html element by xpath.
 
-        2. Writes its timestamp into xpath_collection,
+        2. Writes its timestamp into xpath_collection
         if it doesn't contain one.
+
+        3. Returns True if the element has already been
+        added to the collection, False otherwise.
 
         """
 
         page_content = self.get_page_content()
-        searched_element = self.get_element(page_content)
+        # if request have failed
+        if not page_content:
+            raise NotImplementedError()
 
+        searched_element = self.get_element(page_content)
         # if nothing is found
         if not searched_element:
             raise NotImplementedError()
@@ -109,3 +126,5 @@ class XPathScenario:
         if not old_timestamp:
             self.XPATH_COLLECTION.insert_one(timestamp)
             return False
+
+        return True
