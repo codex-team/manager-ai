@@ -1,7 +1,9 @@
+import re
 from logging import getLogger
 from typing import Tuple, List
 
 from apscheduler.schedulers.blocking import BlockingScheduler
+from yaml import load
 
 from config.settings import *
 
@@ -10,47 +12,76 @@ scheduler = BlockingScheduler()
 scheduler.configure(**SCHEDULER)
 
 
-class Service:
-    """Set of class/static methods for various purposes"""
+class TaskWrapper:
+    """Simple wrapper for task data"""
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
+        self.__dict__.update(kwargs)
 
-    @classmethod
-    def get_tasks(cls) -> List[Tuple["task wrapper", Dict["cron fields"]]]:
-        """Parse the task file,
-        wrap it in a wrapper class, create a crontab
-        and return a list with tuples that contain
-        the wrapped task and crontab"""
-        raise NotImplementedError()
+    def run(self):
+        """Complete the task, namely check and, if necessary, send data."""
+        # TODO: implement this method when creating the controller
+        pass
 
-    @classmethod
-    def deserialize_task(cls, src: "serialized task wrapper") -> "task wrapper":
-        """Task deserialization"""
-        raise NotImplementedError()
-
-    @classmethod
-    def serialize_task(cls, task: "task wrapper") -> Dict[list, str, int, "etc"]:
+    def serialize(self) -> Dict[str, list or str or int or "etc"]:
         """Convert the task object
         to an object consisting of primitive types"""
-        raise NotImplementedError()
+        return self._kwargs
 
     @classmethod
-    def run_task(cls, task: "task wrapper") -> None:
-        """Process the task, namely check and, if necessary, send data"""
-        raise NotImplementedError()
+    def deserialize(cls, kwargs: Dict[str, list or str or int or "etc"]):
+        """Task deserialization"""
+        return cls(**kwargs)
+
+
+def get_tasks() -> List[Tuple[TaskWrapper, Dict["cron fields"]]]:
+    """Parse the task file,
+    wrap it in a wrapper class, create a crontab
+    and return a list with tuples that contain
+    the wrapped task and crontab"""
+    data = None
+    with open(TASKS_FILE_PATH, 'r') as file:
+        data = load(file)
+    if not data:
+        logger.exception(f"Wrong tasks structure in {TASKS_FILE_PATH}")
+        return
+
+    src_tasks = data.get("tasks", [])
+    src_notifiers = data.get("notifiers", [])
+
+    # TODO: write normal wrapping data to TaskWrapper when creating the controller
+    tasks: list = []
+    for src in src_tasks:
+        cron = re.fullmatch(
+            " *" + 4 * "([0-9\*/,a-z]*) +" + "([0-9\*/,a-z]*) *",
+            src.get("schedule", ''),
+            flags=re.IGNORECASE
+        )
+
+        if cron is None:
+            logger.exception(f"Wrong cron for {src.get('name', 'task')}")
+            continue
+
+        cron = {f: cron[i] for f, i in enumerate(("minute", "hour", "day", "month", "day_of_week"))}
+        tasks.append((TaskWrapper(**src), cron))
+
+    TaskWrapper.notifiers = src_notifiers
+    return tasks
 
 
 def process(serialized_task: Dict[list, str, int, "etc"]):
     """Execute scenario"""
-    task: "task wrapper" = Service.deserialize_task(serialized_task)
+    task: TaskWrapper = TaskWrapper.deserialize(serialized_task)
     logger.info(f"Started task processing <{hash(serialized_task)}>")
     try:
-        Service.run_task(task)
+        task.run()
     except Exception as e:
         logger.exception(f"Failed to complete task <{hash(serialized_task)}>: {e}")
 
 
-def add_tasks(task: "task wrapper", cron: Dict["cron fields"]):
+def add_tasks(task: TaskWrapper, cron: Dict["cron fields"]):
     """Add task to scheduler"""
-    serialized_task = Service.serialize_task(task)
+    serialized_task = task.serialize()
     scheduler.add_job(process, "cron", args=[serialized_task], replace_existing=True, **cron)
     logger.info(f"Added new periodic task: #{task.name}")
 

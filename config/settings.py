@@ -11,7 +11,7 @@ from pytz import utc
 PROXY: Dict[str] = None
 
 # File path with specified tasks
-TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), "tasks.txt")
+TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), "tasks.yml")
 
 # default apscheduler config
 SCHEDULER = {
