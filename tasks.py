@@ -29,7 +29,7 @@ class TaskWrapper:
         return self._kwargs
 
     @classmethod
-    def deserialize(cls, kwargs: dict) -> TaskWrapper:
+    def deserialize(cls, kwargs: dict) -> "TaskWrapper":
         """Deserializes task
 
         :param kwargs: dict with src task fields
