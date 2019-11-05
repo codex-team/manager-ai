@@ -1,6 +1,6 @@
 import re
 from logging import getLogger
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from yaml import load
@@ -14,43 +14,47 @@ scheduler.configure(**SCHEDULER)
 
 class TaskWrapper:
     """Simple wrapper for task data"""
+
     def __init__(self, **kwargs):
-        self._kwargs = kwargs
-        self.__dict__.update(kwargs)
+        self._kwargs = kwargs  # saving src data for serialization
+        self.__dict__.update(kwargs)  # setting all the passed parameters
 
     def run(self):
-        """Complete the task, namely check and, if necessary, send data."""
+        """Executes the task, namely checks and, if necessary, sends data."""
         # TODO: implement this method when creating the controller
         pass
 
-    def serialize(self) -> Dict[str, list or str or int or "etc"]:
-        """Convert the task object
-        to an object consisting of primitive types"""
+    def serialize(self) -> dict:
+        """Converts the task object to an dict consisting of primitive types"""
         return self._kwargs
 
     @classmethod
-    def deserialize(cls, kwargs: Dict[str, list or str or int or "etc"]):
-        """Task deserialization"""
+    def deserialize(cls, kwargs: dict) -> TaskWrapper:
+        """Deserializes task
+
+        :param kwargs: dict with src task fields
+        """
         return cls(**kwargs)
 
 
-def get_tasks() -> List[Tuple[TaskWrapper, Dict["cron fields"]]]:
-    """Parse the task file,
-    wrap it in a wrapper class, create a crontab
-    and return a list with tuples that contain
-    the wrapped task and crontab"""
+def get_tasks() -> Union[List[Tuple[TaskWrapper, Dict]], None]:
+    """Parses the task file, wraps it in a wrapper
+    class, creates a crontab and returns a list with
+    tuples that contain the TaskWrapper and dict
+    with cron fields ("minute", "hour", "day",
+    "month", "day_of_week")"""
     data = None
     with open(TASKS_FILE_PATH, "r") as file:
         data = load(file)
     if not data:
         logger.exception(f"Wrong tasks structure in {TASKS_FILE_PATH}")
-        return
+        return None
 
     src_tasks = data.get("tasks", [])
     src_notifiers = data.get("notifiers", [])
 
     # TODO: write normal wrapping data to TaskWrapper when creating the controller
-    tasks: list = []
+    tasks = []
     for src in src_tasks:
         cron = re.fullmatch(
             " *" + 4 * "([0-9\*/,a-z]*) +" + "([0-9\*/,a-z]*) *",
@@ -69,8 +73,11 @@ def get_tasks() -> List[Tuple[TaskWrapper, Dict["cron fields"]]]:
     return tasks
 
 
-def process(serialized_task: Dict[str, list or str or int or "etc"]):
-    """Execute scenario"""
+def process(serialized_task: dict):
+    """Runs scenario
+
+    :param serialized_task: dict consisting of primitive types
+    """
     task: TaskWrapper = TaskWrapper.deserialize(serialized_task)
     logger.info(f"Started task processing <{hash(serialized_task)}>")
     try:
@@ -79,16 +86,21 @@ def process(serialized_task: Dict[str, list or str or int or "etc"]):
         logger.exception(f"Failed to complete task <{hash(serialized_task)}>: {e}")
 
 
-def add_tasks(task: TaskWrapper, cron: Dict["cron fields"]):
-    """Add task to scheduler"""
+def add_tasks(task: TaskWrapper, cron: dict):
+    """Adds task to scheduler
+
+    :param task: task object
+    :param cron: dict with cron fields ("minute", "hour", "day", "month", "day_of_week")
+    """
     serialized_task = task.serialize()
     scheduler.add_job(process, "cron", args=[serialized_task], replace_existing=True, **cron)
     logger.info(f"Added new periodic task: #{task.name}")
 
 
 def run():
+    """Gets tasks, adds them to the scheduler, and launches"""
     logger.info(f"Run manager-ai")
-    tasks_with_cron = Service.get_tasks()
+    tasks_with_cron = get_tasks()
     # TODO: implement a lambda func that selects only new tasks
     tasks_with_cron = list(filter(lambda task_with_cron: task_with_cron, tasks_with_cron))
     logger.info(f"Found {len(tasks_with_cron)} new tasks in {TASKS_FILE_PATH}")
