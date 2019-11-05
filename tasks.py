@@ -62,7 +62,7 @@ def get_tasks() -> Union[List[Tuple[TaskWrapper, Dict]], None]:
             " *" + 4 * "([0-9\*/,a-z]*) +" + "([0-9\*/,a-z]*) *",
             src.get("schedule", ""),
             flags=re.IGNORECASE
-        )
+        )  # parse cron fields
 
         if cron is None:
             logger.exception(f"Wrong cron for {src.get('name', 'task')}")
