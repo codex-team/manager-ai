@@ -1,6 +1,6 @@
 import unittest
 import httpretty
-from scenarios.xpathscenario import XPathScenario
+from src.scenarios.xpathscenario import XPathScenario
 
 SAMPLE_BODY = r"""
 <html>
@@ -66,6 +66,7 @@ class TestXPathScenario(unittest.TestCase):
         scenario = XPathScenario(params_list[0])
         exists = scenario.run()
         self.assertEqual(exists, True)
+        XPathScenario.XPATH_COLLECTION.drop()
 
     def tearDown(self) -> None:
         httpretty.disable()

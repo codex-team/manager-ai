@@ -9,7 +9,7 @@ from pymongo import MongoClient
 from pytz import utc
 
 # set it in local_settings.py
-PROXY: Dict[str, str]
+PROXY: Dict[str, str] = None
 
 # File path with specified tasks
 TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), "tasks.yml")

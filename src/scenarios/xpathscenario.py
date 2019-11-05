@@ -10,7 +10,9 @@ from config.settings import MONGO_CLIENT, DATABASE_NAME
 
 class XPathScenario:
     """
-    <Writing general description in progress...>
+    A class representing a scenario in which you need to get an html element by xpath
+    from specified web page and save its string representation and timestamp
+    (datetime of the last check).
 
     It uses MongoDB to store data:
         Elements and their timestamps are stored as a document in xpath_collection
@@ -25,12 +27,24 @@ class XPathScenario:
             }
 
         Hashes are used to make strings shorter.
+
+    Attributes:
+        - XPATH_COLLECTION: mongoDB collection where elements and their timestamps are stored
+        - url: URL for making GET request
+        - xpath: xpath expression for searching element
+        - proxies: dictionary with proxies to use for GET request
+        - timestamp_id: id used to get document with element and its timestamp from XPATH_COLLECTION
     """
 
-    # mongoDB collection where elements and their timestamps are stored
     XPATH_COLLECTION = MONGO_CLIENT[DATABASE_NAME]["xpath_collection"]
 
     def __init__(self, params: dict):
+        """Initialize XPathScenario.
+
+        :param params: A dictionary with initial parameters for XPathScenario
+            object. It must contain 'url' and 'xpath' keys.
+        """
+
         try:
             self.url = params['url']
             self.xpath = params['xpath']
@@ -39,17 +53,19 @@ class XPathScenario:
                             "with keys 'url' and 'xpath'.")
 
         self.proxies = params.get('proxies')
-        self.timestamp_key: str = self.__get_hash(self.url + self.xpath)
+        self.timestamp_id: str = self.__get_hash(self.url + self.xpath)
 
-    def get_element(self, document):
+    def get_element(self, document: str):
         """Searches for an html element in {document} by
         its xpath and returns its string representation.
+
+        :param document: A string to search element in.
         """
 
         tree = html.fromstring(document)
         try:
             elem_lst = tree.xpath(self.xpath)
-        except Exception:
+        except:
             logging.exception("XPathError")
             # TODO: exception handling
             return None
@@ -58,7 +74,10 @@ class XPathScenario:
 
     def get_page_content(self, url=None):
         """Makes a GET request to the {self.url} or
-        to the {url} if specified."""
+        to the {url} if specified.
+
+        :param url: URL for making GET request.
+        """
 
         url = url if url else self.url
         try:
@@ -70,19 +89,12 @@ class XPathScenario:
 
         return response.text
 
-    # def checkout_timestamp(self, element_info: dict):
-    #     # get date of the last change
-    #     timestamp = datetime.strptime(element_info['timestamp'],
-    #                                   "%Y-%m-%d %H:%M:%S")
-    #
-    #     now = datetime.now()   # get current date
-    #     delta = now - timestamp  # calculate time difference
-    #
-    #     return delta.total_seconds() >= self.params['max-secs-without-changes']
-
     @staticmethod
     def __get_hash(string) -> str:
-        """Returns md5 hash of the given string / byte sequence."""
+        """Returns md5 hash of the given string / byte sequence.
+
+        :param string: A string / byte sequence to make hash of.
+        """
 
         if type(string) is str:
             string = bytes(string, "utf-8")
@@ -115,12 +127,12 @@ class XPathScenario:
             raise NotImplementedError()
 
         timestamp = {
-            "_id": self.timestamp_key,
+            "_id": self.timestamp_id,
             "element": self.__get_hash(searched_element),
-            "timestamp": datetime.now()  # str(datetime.now()).split(".")[0]
+            "timestamp": datetime.now()
         }
 
-        old_timestamp = self.XPATH_COLLECTION.find_one({"_id": self.timestamp_key})
+        old_timestamp = self.XPATH_COLLECTION.find_one({"_id": self.timestamp_id})
 
         # if there is no such element in collection
         if not old_timestamp:
