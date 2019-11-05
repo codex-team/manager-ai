@@ -58,9 +58,10 @@ def get_tasks() -> Union[List[Tuple[TaskWrapper, Dict]], None]:
     # TODO: write normal wrapping data to TaskWrapper when creating the controller
     tasks = []
     for src in src_tasks:
+        schedule = src.get("schedule", "").strip()
         cron = re.fullmatch(
-            " *" + 4 * "([0-9*/,a-z]*) +" + "([0-9*/,a-z]*) *",
-            src.get("schedule", ""),
+            5 * "([0-9*/,a-z]*) +",
+            schedule,
             flags=re.IGNORECASE
         )  # parse cron fields
 
