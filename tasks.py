@@ -60,7 +60,7 @@ def get_tasks() -> Union[List[Tuple[TaskWrapper, Dict]], None]:
     for src in src_tasks:
         schedule = src.get("schedule", "").strip()
         cron = re.fullmatch(
-            5 * "([0-9*/,a-z]*) +",
+            " ".join("([0-9*/,a-z]*)" for _ in range(5)),
             schedule,
             flags=re.IGNORECASE
         )  # parse cron fields
