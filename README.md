@@ -15,31 +15,42 @@ The main idea of this project is an increasing of projects performance inside of
 
 ## Default structure of file with tasks
 ```yaml
+      
     tasks:
-        # page that will be parsed
-        \- url: "https://t.me/s/codex_team"
-        
-        # xpath expression for watсhing element
-        xpath: "/html/body/main/div/section/div[20]/div[1]/div[2]/div[3]/div/span[3]/a/time"
-        
-        # 7 days; number of seconds after which a notification will be sent if there were no changes
-        max-secs-without-changes: 604800
-        
-        # url for sending notifications (see https://github.com/codex-bot/notify)
-        notify-url: "https://notify.bot.codex.so/u/"
+        # task name
+        - name: "Check last telegram post date"
         
         # string for scheduling in crontab-like syntax (see https://crontab.guru).
         schedule: "29 13-20 * * 1-5"
         
-        # messages list to be send
-        messages:
-            "mess1"
-            "mess2"
-            "messN"
+        # scenario type
+        scenario: "xpath"
+        
+        # path to file wuth messages list to be send
+        messages: "./messages.yml"
+        
+        # page that will be parsed
+        url: "https://t.me/s/codex_team"
+        
+        # xpath expression for watсhing element
+        xpath: "/html/body/main/div/section/div[20]/div[1]/div[2]/div[3]/div/span[3]/a/time"
+        
+        hooks:
+        
+          # on_changed action
+          changed:
+            notifier: "Telegram"
             
-        # recipients only for this task
-        recipients:
-            "szzszdf"
-            "asdfsd"
-            "sdfsdfs"
+          # on_no-changed action  
+          no-changes:
+            notifier: "Work Email"
+            time: 40000
+
+    notifiers:
+        - name: "Telegram"
+        type: "telegram"
+        webhook: "https://notify.bot.codex.so/u/R4ND0M"
+        - name: "Work Email"
+        type: "email"
+        address: "work@me.ru"
 ```
