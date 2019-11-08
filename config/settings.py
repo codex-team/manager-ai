@@ -5,6 +5,7 @@ from typing import Dict
 
 from apscheduler.executors.pool import ProcessPoolExecutor
 from apscheduler.jobstores.mongodb import MongoDBJobStore
+from pymongo import MongoClient
 from pytz import utc
 
 # set it in local_settings.py
@@ -13,10 +14,14 @@ PROXY: Dict[str, str] = None
 # File path with specified tasks
 TASKS_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), "tasks.yml")
 
+# mongoDB setup
+MONGO_CLIENT = MongoClient(host=MongoClient.HOST, port=MongoClient.PORT)
+DATABASE_NAME = "manager"
+
 # default apscheduler config
 SCHEDULER = {
     "jobstores": {
-        "default": MongoDBJobStore(database="scheduler", collection="jobs", host="mongodb", port=27017)
+        "default": MongoDBJobStore(database=DATABASE_NAME, collection="jobs", client=MONGO_CLIENT)
     }, "executors": {
         "default": {"type": "threadpool", "max_workers": 20},
         "processpool": ProcessPoolExecutor(max_workers=5)
