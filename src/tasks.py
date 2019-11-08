@@ -1,13 +1,11 @@
 import re
-from logging import getLogger
 from typing import Tuple, List, Union
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from yaml import load
 
-from config.settings import *
+from src.settings import *
 
-logger = getLogger("general")
 scheduler = BlockingScheduler()
 scheduler.configure(**SCHEDULER)
 
