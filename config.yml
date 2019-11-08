@@ -1,0 +1,26 @@
+tasks:
+  - name: Check last telegram post date
+    schedule: 29 13-20 * * 1-5
+    xpath:
+      messages: ./messages.yml
+      url: https://t.me/s/codex_team
+      xpath: /html/body/main/div/section/div[20]/div[1]/div[2]/div[3]/div/span[3]/a/time
+      hooks:
+        changed:
+          notifier: Telegram
+        no-changes:
+          notifier: Work Email
+          time: 40000
+
+notifiers:
+  - name: Telegram
+    type: telegram
+    webhook: https://sample.link
+  - name: Work Email
+    type: email
+    address: work@me.com
+
+database:
+  host: host_name
+  port: 27017
+  name: my_db

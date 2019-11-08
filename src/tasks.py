@@ -46,10 +46,10 @@ def get_tasks() -> Union[List[Tuple[TaskWrapper, Dict]], None]:
     with cron fields ("minute", "hour", "day",
     "month", "day_of_week")"""
     data = None
-    with open(TASKS_FILE_PATH, "r") as file:
+    with open(CONFIG_FILE_PATH, "r") as file:
         data = load(file)
     if not data:
-        logger.exception(f"Wrong tasks structure in {TASKS_FILE_PATH}")
+        logger.exception(f"Wrong tasks structure in {CONFIG_FILE_PATH}")
         return None
 
     src_tasks = data.get("tasks", [])
@@ -106,7 +106,7 @@ def run():
     tasks_with_cron = get_tasks()
     # TODO: implement a lambda func that selects only new tasks
     tasks_with_cron = list(filter(lambda task_with_cron: task_with_cron, tasks_with_cron))
-    logger.info(f"Found {len(tasks_with_cron)} new tasks in {TASKS_FILE_PATH}")
+    logger.info(f"Found {len(tasks_with_cron)} new tasks in {CONFIG_FILE_PATH}")
     for task, cron in tasks_with_cron:
         add_tasks(task, cron)
     try:
