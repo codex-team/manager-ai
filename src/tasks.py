@@ -12,37 +12,51 @@ scheduler = BlockingScheduler()
 scheduler.configure(**SCHEDULER)
 
 
-class TaskWrapper:
-    """Simple wrapper for task data"""
+class BaseTask:
+    """Base task wrapper"""
 
-    def __init__(self, **kwargs):
-        # TODO: fix hardcode
-        self._kwargs = kwargs  # saving src data for serialization
+    def __init__(self, name, **kwargs):
+        # TODO: explicitly specify the parameters that are used in all tasks
+        self.name = name
+        self.notifiers = None
+        # TODO: edit this logic if we change the task config (one field notifiers for all tasks)
+        self._arg_names = list(kwargs.keys()) + ["name", "notifiers"]  # saving arg names for serialization
         self.__dict__.update(kwargs)  # setting all the passed parameters
 
     def run(self):
-        """Executes the task, namely checks and, if necessary, sends data."""
-        # TODO: implement this method when creating the controller
-        pass
+        """Executes the task. Base class level."""
+        assert self.notifiers is not None, "You did not specify notifiers, use BaseTask.set_notifiers method"
+        self._run()
+
+    def _run(self):
+        """Executes the task. Implemented class level."""
+        raise NotImplementedError("Implement this method in an inherited class")
 
     def serialize(self) -> dict:
         """Converts the task object to an dict consisting of primitive types"""
-        # TODO: fix hardcode
-        return self._kwargs
+        serialized_task = {}
+        for key in self._arg_names:
+            serialized_task.update({key: self.__getattribute__(key)})
+        return serialized_task
 
     @classmethod
-    def deserialize(cls, kwargs: dict) -> "TaskWrapper":
+    def deserialize(cls, args: dict) -> "BaseTask":
         """Deserializes task
 
-        :param kwargs: dict with src task fields
+        :param args: dict with src task fields
         """
-        return cls(**kwargs)
+        return cls(**args)
+
+    @classmethod
+    def set_notifiers(cls, notifiers: List[Dict]):
+        """Task notifiers"""
+        cls.notifiers = notifiers
 
 
-def get_tasks() -> Union[List[Tuple[TaskWrapper, Dict]], None]:
+def get_tasks_and_notifiers() -> Union[Tuple[List[Tuple[BaseTask, Dict]], List[Dict]], Tuple[None, None]]:
     """Parses the task file, wraps it in a wrapper
     class, creates a crontab and returns a list with
-    tuples that contain the TaskWrapper and dict
+    tuples that contain the BaseTask and dict
     with cron fields ("minute", "hour", "day",
     "month", "day_of_week")"""
     data = None
@@ -50,12 +64,12 @@ def get_tasks() -> Union[List[Tuple[TaskWrapper, Dict]], None]:
         data = load(file)
     if not data:
         logger.exception(f"Wrong tasks structure in {TASKS_FILE_PATH}")
-        return None
+        return None, None
 
     src_tasks = data.get("tasks", [])
     src_notifiers = data.get("notifiers", [])
 
-    # TODO: write normal wrapping data to TaskWrapper when creating the controller
+    # TODO: write normal wrapping data to BaseTask when creating the controller
     tasks = []
     for src in src_tasks:
         schedule = src.get("schedule", "").strip()
@@ -70,10 +84,9 @@ def get_tasks() -> Union[List[Tuple[TaskWrapper, Dict]], None]:
             continue
 
         cron = {f: cron[i] for f, i in enumerate(("minute", "hour", "day", "month", "day_of_week"))}
-        tasks.append((TaskWrapper(**src), cron))
+        tasks.append((BaseTask(**src), cron))
 
-    TaskWrapper.notifiers = src_notifiers
-    return tasks
+    return tasks, src_notifiers
 
 
 def process(serialized_task: dict):
@@ -81,7 +94,7 @@ def process(serialized_task: dict):
 
     :param serialized_task: dict consisting of primitive types
     """
-    task: TaskWrapper = TaskWrapper.deserialize(serialized_task)
+    task: BaseTask = BaseTask.deserialize(serialized_task)
     logger.info(f"Started task processing <{hash(serialized_task)}>")
     try:
         task.run()
@@ -89,7 +102,7 @@ def process(serialized_task: dict):
         logger.exception(f"Failed to complete task <{hash(serialized_task)}>: {e}")
 
 
-def add_tasks(task: TaskWrapper, cron: dict):
+def add_tasks(task: BaseTask, cron: dict):
     """Adds task to scheduler
 
     :param task: task object
@@ -103,7 +116,8 @@ def add_tasks(task: TaskWrapper, cron: dict):
 def run():
     """Gets tasks, adds them to the scheduler, and launches"""
     logger.info(f"Run manager-ai")
-    tasks_with_cron = get_tasks()
+    tasks_with_cron, notifiers = get_tasks_and_notifiers()
+    BaseTask.set_notifiers(notifiers)
     # TODO: implement a lambda func that selects only new tasks
     tasks_with_cron = list(filter(lambda task_with_cron: task_with_cron, tasks_with_cron))
     logger.info(f"Found {len(tasks_with_cron)} new tasks in {TASKS_FILE_PATH}")
