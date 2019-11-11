@@ -40,12 +40,12 @@ class BaseTask:
         return serialized_task
 
     @classmethod
-    def deserialize(cls, args: dict) -> "BaseTask":
+    def deserialize(cls, kwargs: dict) -> "BaseTask":
         """Deserializes task
 
-        :param args: dict with src task fields
+        :param kwargs: dict with src task fields
         """
-        return cls(**args)
+        return cls(**kwargs)
 
     @classmethod
     def set_notifiers(cls, notifiers: List[Dict]):
