@@ -1,4 +1,3 @@
-import re
 from logging import getLogger
 from typing import Tuple, List, Union
 
@@ -21,7 +20,7 @@ class Controller:
         tuples that contain the TaskWrapper and dict
         with cron fields ("minute", "hour", "day",
         "month", "day_of_week")"""
-        data = None
+
         with open(TASKS_FILE_PATH, "r") as file:
             data = yaml.load(file, Loader=yaml.FullLoader)
         if not data:
@@ -35,7 +34,6 @@ class Controller:
         tasks = []
         for src in src_tasks:
             schedule = src.get("schedule", "").strip()
-            print(schedule)
             tasks.append((TaskWrapper(**src), schedule))
 
         TaskWrapper.notifiers = src_notifiers
