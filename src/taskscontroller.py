@@ -13,7 +13,7 @@ scheduler = BlockingScheduler()
 scheduler.configure(**SCHEDULER)
 
 
-class Controller:
+class TasksController:
     """A class that parses a configuration file,
     sets tasks to be executed using apscheduler"""
 
@@ -83,5 +83,5 @@ class Controller:
 
 
 if __name__ == "__main__":
-    controller = Controller()
+    controller = TasksController()
     controller.run()
