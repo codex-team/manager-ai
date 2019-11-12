@@ -1,26 +1,12 @@
-tasks:
-  - name: Check last telegram post date
-    schedule: 29 13-20 * * 1-5
-    xpath:
-      messages: ./messages.yml
-      url: https://t.me/s/codex_team
-      xpath: /html/body/main/div/section/div[20]/div[1]/div[2]/div[3]/div/span[3]/a/time
-      hooks:
-        changed:
-          notifier: Telegram
-        no-changes:
-          notifier: Work Email
-          time: 40000
-
-notifiers:
-  - name: Telegram
-    type: telegram
-    webhook: https://sample.link
-  - name: Work Email
-    type: email
-    address: work@me.com
+# database settings section (optional)
 
 database:
-  host: host_name
+  # hostname or IP address of a MongoDB instance to connect to
+  # see <https://api.mongodb.com/python/current/api/pymongo/mongo_client.html>
+  host: localhost
+
+  # port of a MongoDB instance
   port: 27017
-  name: my_db
+
+  # name of the database
+  name: manager
