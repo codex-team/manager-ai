@@ -14,12 +14,12 @@ scheduler.configure(**SCHEDULER)
 
 
 class Controller:
+    """Main class that controls scheduled tasks launch"""
+
     def get_tasks(self) -> Union[List[Tuple[TaskWrapper, Dict]], None]:
         """Parses the task file, wraps it in a wrapper
-        class, creates a crontab and returns a list with
-        tuples that contain the TaskWrapper and dict
-        with cron fields ("minute", "hour", "day",
-        "month", "day_of_week")"""
+        class, returns a list with
+        tuples that contain the TaskWrapper and schedule"""
 
         with open(TASKS_FILE_PATH, "r") as file:
             data = yaml.load(file, Loader=yaml.FullLoader)
@@ -44,7 +44,7 @@ class Controller:
 
         :param serialized_task: dict consisting of primitive types
         """
-        print("Hello")
+
         task: TaskWrapper = TaskWrapper.deserialize(serialized_task)
         logger.info(f"Started task processing <{serialized_task['name']}>")
         try:
@@ -58,6 +58,7 @@ class Controller:
         :param task: task object
         :param schedule: string with cron
         """
+
         serialized_task = task.serialize()
         scheduler.add_job(
             self.process,
