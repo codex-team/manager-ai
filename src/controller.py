@@ -14,7 +14,8 @@ scheduler.configure(**SCHEDULER)
 
 
 class Controller:
-    """Main class that controls scheduled tasks launch"""
+    """A class that parses a configuration file,
+    sets tasks to be executed using apscheduler"""
 
     def get_tasks(self) -> Union[List[Tuple[TaskWrapper, Dict]], None]:
         """Parses the task file, wraps it in a wrapper
