@@ -39,12 +39,12 @@ class Controller:
         TaskWrapper.notifiers = src_notifiers
         return tasks
 
-    @staticmethod
-    def process(serialized_task: dict):
+    def process(self, serialized_task: dict):
         """Runs scenario
 
         :param serialized_task: dict consisting of primitive types
         """
+        print("Hello")
         task: TaskWrapper = TaskWrapper.deserialize(serialized_task)
         logger.info(f"Started task processing <{serialized_task['name']}>")
         try:
@@ -62,22 +62,22 @@ class Controller:
         scheduler.add_job(
             self.process,
             CronTrigger.from_crontab(schedule),
-            args=[serialized_task],
+            [serialized_task],
             replace_existing=True
         )
         logger.info(f"Added new periodic task: #{task.name}")
 
     def run(self):
         """Gets tasks, adds them to the scheduler, and launches"""
+
         logger.info(f"Run manager-ai")
         tasks_with_cron = self.get_tasks()
         logger.info(f"Found {len(tasks_with_cron)} new tasks in {TASKS_FILE_PATH}")
+
         for task, schedule in tasks_with_cron:
             self.add_tasks(task, schedule)
-        try:
-            scheduler.start()
-        except (KeyboardInterrupt, SystemExit):
-            pass
+
+        scheduler.start()
 
 
 if __name__ == "__main__":
