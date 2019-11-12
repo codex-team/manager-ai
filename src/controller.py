@@ -41,17 +41,18 @@ class Controller:
         TaskWrapper.notifiers = src_notifiers
         return tasks
 
-    def process(self, serialized_task: dict):
+    @staticmethod
+    def process(serialized_task: dict):
         """Runs scenario
 
         :param serialized_task: dict consisting of primitive types
         """
         task: TaskWrapper = TaskWrapper.deserialize(serialized_task)
-        logger.info(f"Started task processing <{hash(serialized_task)}>")
+        logger.info(f"Started task processing <{serialized_task['name']}>")
         try:
             task.run()
         except Exception as e:
-            logger.exception(f"Failed to complete task <{hash(serialized_task)}>: {e}")
+            logger.exception(f"Failed to complete task <{serialized_task['name']}>: {e}")
 
     def add_tasks(self, task: TaskWrapper, schedule):
         """Adds task to scheduler
