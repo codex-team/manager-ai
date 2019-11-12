@@ -3,7 +3,8 @@ from logging import getLogger
 from typing import Tuple, List, Union
 
 from apscheduler.schedulers.blocking import BlockingScheduler
-from yaml import load
+from apscheduler.triggers.cron import CronTrigger
+import yaml
 
 from src.tasks import TaskWrapper
 from config.settings import *
@@ -22,7 +23,7 @@ class Controller:
         "month", "day_of_week")"""
         data = None
         with open(TASKS_FILE_PATH, "r") as file:
-            data = load(file)
+            data = yaml.load(file, Loader=yaml.FullLoader)
         if not data:
             logger.exception(f"Wrong tasks structure in {TASKS_FILE_PATH}")
             return None
@@ -34,18 +35,8 @@ class Controller:
         tasks = []
         for src in src_tasks:
             schedule = src.get("schedule", "").strip()
-            cron = re.fullmatch(
-                " ".join("([0-9*/,a-z]*)" for _ in range(5)),
-                schedule,
-                flags=re.IGNORECASE
-            )  # parse cron fields
-
-            if cron is None:
-                logger.exception(f"Wrong cron for {src.get('name', 'task')}")
-                continue
-
-            cron = {f: cron[i] for f, i in enumerate(("minute", "hour", "day", "month", "day_of_week"))}
-            tasks.append((TaskWrapper(**src), cron))
+            print(schedule)
+            tasks.append((TaskWrapper(**src), schedule))
 
         TaskWrapper.notifiers = src_notifiers
         return tasks
@@ -62,25 +53,28 @@ class Controller:
         except Exception as e:
             logger.exception(f"Failed to complete task <{hash(serialized_task)}>: {e}")
 
-    def add_tasks(self, task: TaskWrapper, cron: dict):
+    def add_tasks(self, task: TaskWrapper, schedule):
         """Adds task to scheduler
 
         :param task: task object
-        :param cron: dict with cron fields ("minute", "hour", "day", "month", "day_of_week")
+        :param schedule: string with cron
         """
         serialized_task = task.serialize()
-        scheduler.add_job(self.process, "cron", args=[serialized_task], replace_existing=True, **cron)
+        scheduler.add_job(
+            self.process,
+            CronTrigger.from_crontab(schedule),
+            args=[serialized_task],
+            replace_existing=True
+        )
         logger.info(f"Added new periodic task: #{task.name}")
 
     def run(self):
         """Gets tasks, adds them to the scheduler, and launches"""
         logger.info(f"Run manager-ai")
         tasks_with_cron = self.get_tasks()
-        # TODO: implement a lambda func that selects only new tasks
-        tasks_with_cron = list(filter(lambda task_with_cron: task_with_cron, tasks_with_cron))
         logger.info(f"Found {len(tasks_with_cron)} new tasks in {TASKS_FILE_PATH}")
-        for task, cron in tasks_with_cron:
-            self.add_tasks(task, cron)
+        for task, schedule in tasks_with_cron:
+            self.add_tasks(task, schedule)
         try:
             scheduler.start()
         except (KeyboardInterrupt, SystemExit):
