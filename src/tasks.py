@@ -12,6 +12,10 @@ scheduler = BlockingScheduler()
 scheduler.configure(**SCHEDULER)
 
 
+class TaskWrapperException(Exception):
+    pass
+
+
 class BaseTask:
     """Base task wrapper"""
 
@@ -24,12 +28,19 @@ class BaseTask:
         self.__dict__.update(kwargs)  # setting all the passed parameters
 
     def run(self):
-        """Executes the task. Base class level."""
-        assert self.notifiers is not None, "You did not specify notifiers, use BaseTask.set_notifiers method"
+        """Executes the task. Base class level.
+
+        :raise TaskWrapperException: If notifiers is not specified
+        :raise NotImplementedError: If `_run` method is not implemented
+        """
+        if self.__class__.notifiers is not None:
+            raise TaskWrapperException("You did not specify notifiers, use BaseTask.set_notifiers method")
         self._run()
 
     def _run(self):
-        """Executes the task. Implemented class level."""
+        """Executes the task. Implemented class level.
+
+        :raise NotImplementedError: If `_run` method is not implemented"""
         raise NotImplementedError("Implement this method in an inherited class")
 
     def serialize(self) -> dict:
@@ -49,7 +60,7 @@ class BaseTask:
 
     @classmethod
     def set_notifiers(cls, notifiers: List[Dict]):
-        """Task notifiers"""
+        """Sets task notifiers"""
         cls.notifiers = notifiers
 
 
