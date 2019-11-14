@@ -53,6 +53,10 @@ LOGGING = {
             "handlers": ["console_stderr"],
             "level": "INFO",
         },
+        "test": {
+            "handlers": ["console_stderr"],
+            "level": "INFO",
+        },
     }
 }
 

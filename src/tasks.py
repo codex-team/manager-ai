@@ -7,7 +7,9 @@ from yaml import load
 
 from config.settings import *
 
-logger = getLogger("general")
+__module__ = sys.modules[__name__]
+
+logger = getLogger("test")
 scheduler = BlockingScheduler()
 scheduler.configure(**SCHEDULER)
 
@@ -18,29 +20,31 @@ class TaskWrapperException(Exception):
 
 class BaseTask:
     """Base task wrapper"""
+    notifiers = None
 
     def __init__(self, name, **kwargs):
         # TODO: explicitly specify the parameters that are used in all tasks
         self.name = name
-        self.notifiers = None
-        # TODO: edit this logic if we change the task config (one field notifiers for all tasks)
-        self._arg_names = list(kwargs.keys()) + ["name", "notifiers"]  # saving arg names for serialization
+        self._arg_names = list(kwargs.keys()) + ["name"]  # saving arg names for serialization
         self.__dict__.update(kwargs)  # setting all the passed parameters
 
     def run(self):
-        """Executes the task. Base class level.
+        """
+        Executes the task. Base class level.
 
         :raise TaskWrapperException: If notifiers is not specified
         :raise NotImplementedError: If `_run` method is not implemented
         """
-        if self.__class__.notifiers is not None:
+        if self.__class__.notifiers is None:
             raise TaskWrapperException("You did not specify notifiers, use BaseTask.set_notifiers method")
         self._run()
 
     def _run(self):
-        """Executes the task. Implemented class level.
+        """
+        Executes the task. Implemented class level.
 
-        :raise NotImplementedError: If `_run` method is not implemented"""
+        :raise NotImplementedError: If `_run` method is not implemented
+        """
         raise NotImplementedError("Implement this method in an inherited class")
 
     def serialize(self) -> dict:
@@ -63,18 +67,65 @@ class BaseTask:
         """Sets task notifiers"""
         cls.notifiers = notifiers
 
+    def __eq__(self, other):
+        if other is None or type(other) is not type(self):
+            return False
+        for field_name in self._arg_names:
+            if getattr(self, field_name, None) != getattr(other, field_name, None):
+                return False
+        return True
 
-def get_tasks_and_notifiers() -> Union[Tuple[List[Tuple[BaseTask, Dict]], List[Dict]], Tuple[None, None]]:
-    """Parses the task file, wraps it in a wrapper
-    class, creates a crontab and returns a list with
-    tuples that contain the BaseTask and dict
-    with cron fields ("minute", "hour", "day",
-    "month", "day_of_week")"""
-    data = None
-    with open(TASKS_FILE_PATH, "r") as file:
-        data = load(file)
+    def __hash__(self):
+        result = hash(self.__class__.__name__)
+        result += sum((hash(f"{field_name}:{getattr(self, field_name)}") for field_name in self._arg_names))
+        return hash(result)
+
+
+class HelloWorldTask(BaseTask):
+    """Simple task"""
+    def stdout_notify(self, message):
+        logger.info(f"Notifies about {self.name} task by ")
+        print(message)
+
+    def _run(self) -> None:
+        """Task execution logic"""
+        logger.info(f"Executes {self.name} task")
+        notifier = tuple(filter(lambda ntfr: ntfr.get("name") == self.notifier, self.__class__.notifiers))
+        if not notifier:
+            logger.error(f"{self.notifier} notifier not found in self.notifiers [task_name:{self.name}]")
+            return None
+        notifier = notifier[0]
+        notify = self.__getattribute__(f"{notifier.get('type')}_notify")  # getting class method by name
+        notify("Hello World!")
+        return None
+
+
+def get_task_class(scenario_name: str):
+    """
+    Looking for class by scenario name.
+
+    Example:
+         get_task_class("hello_world") -> :class:`HelloWorldTask`
+
+    :param scenario_name: name of scenario
+    :return: TaskBase class implementation or None [If task class for `scenario_name` is not found]
+    """
+    task_class_name = f"{''.join(word.title() for word in scenario_name.split('_'))}Task"
+    cls = getattr(__module__, task_class_name, None)
+    if cls is None:
+        logger.error(f"{task_class_name} not found")
+    return cls
+
+
+def get_tasks_and_notifiers(data) -> Union[Tuple[List[Tuple[BaseTask, Dict]], List[Dict]], Tuple[None, None]]:
+    """
+    Wraps src data in a wrapper class, creates a crontab and returns
+    a list with tuples that contain the BaseTask and dict with cron
+    fields ("minute", "hour", "day", "month", "day_of_week")
+    """
+
     if not data:
-        logger.exception(f"Wrong tasks structure in {TASKS_FILE_PATH}")
+        logger.exception(f"Wrong tasks data")
         return None, None
 
     src_tasks = data.get("tasks", [])
@@ -94,14 +145,21 @@ def get_tasks_and_notifiers() -> Union[Tuple[List[Tuple[BaseTask, Dict]], List[D
             logger.exception(f"Wrong cron for {src.get('name', 'task')}")
             continue
 
-        cron = {f: cron[i] for f, i in enumerate(("minute", "hour", "day", "month", "day_of_week"))}
-        tasks.append((BaseTask(**src), cron))
+        cron = cron.groups()
+        cron = {f: cron[i] for i, f in enumerate(("minute", "hour", "day", "month", "day_of_week"))}
+
+        task_class = get_task_class(src.get("scenario"))
+        if task_class is None:
+            continue
+
+        tasks.append((task_class(**src), cron))
 
     return tasks, src_notifiers
 
 
 def process(serialized_task: dict):
-    """Runs scenario
+    """
+    Runs scenario
 
     :param serialized_task: dict consisting of primitive types
     """
@@ -114,7 +172,8 @@ def process(serialized_task: dict):
 
 
 def add_tasks(task: BaseTask, cron: dict):
-    """Adds task to scheduler
+    """
+    Adds task to scheduler
 
     :param task: task object
     :param cron: dict with cron fields ("minute", "hour", "day", "month", "day_of_week")
@@ -127,7 +186,12 @@ def add_tasks(task: BaseTask, cron: dict):
 def run():
     """Gets tasks, adds them to the scheduler, and launches"""
     logger.info(f"Run manager-ai")
-    tasks_with_cron, notifiers = get_tasks_and_notifiers()
+
+    data = None
+    with open(TASKS_FILE_PATH, "r") as file:
+        data = load(file)
+
+    tasks_with_cron, notifiers = get_tasks_and_notifiers(data)
     BaseTask.set_notifiers(notifiers)
     # TODO: implement a lambda func that selects only new tasks
     tasks_with_cron = list(filter(lambda task_with_cron: task_with_cron, tasks_with_cron))
