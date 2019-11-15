@@ -1,0 +1,12 @@
+# database settings section (optional)
+
+database:
+  # hostname or IP address of a MongoDB instance to connect to
+  # see <https://api.mongodb.com/python/current/api/pymongo/mongo_client.html>
+  host: localhost
+
+  # port of a MongoDB instance
+  port: 27017
+
+  # name of the database
+  name: manager

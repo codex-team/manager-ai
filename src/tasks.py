@@ -5,6 +5,7 @@ class TaskWrapper:
         # TODO: fix hardcode
         self._kwargs = kwargs  # saving src data for serialization
         self.__dict__.update(kwargs)  # setting all the passed parameters
+        self.schedule = kwargs.get("schedule", "").strip()
 
     def run(self):
         """Executes the task, namely checks and, if necessary, sends data."""
