@@ -5,7 +5,7 @@ from hashlib import md5 as make_hash
 import requests
 from lxml import html
 
-from config.settings import MONGO_CLIENT, DATABASE_NAME
+from src.settings import MONGO_CLIENT, DATABASE_NAME
 
 
 class XPathScenario:
