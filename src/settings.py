@@ -51,20 +51,27 @@ CONFIG_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))),
 MONGO_HOST = MongoClient.HOST
 MONGO_PORT = MongoClient.PORT
 DATABASE_NAME = "manager"
+SRC_TASKS = None
+SRC_NOTIFIERS = None
 
 # load db settings from configuration file
 if path.exists(CONFIG_FILE_PATH):
     with open(CONFIG_FILE_PATH, 'r') as config_file:
         try:
-            config_dict = safe_load(config_file.read())["database"]
+            config_dict = safe_load(config_file.read())
             if config_dict.get('host'):
-                MONGO_HOST = config_dict.get('host')
+                MONGO_HOST = config_dict["database"].get('host')
 
             if config_dict.get('port'):
-                MONGO_PORT = config_dict.get('port')
+                MONGO_PORT = config_dict["database"].get('port')
 
             if config_dict.get('name'):
-                DATABASE_NAME = config_dict.get('name')
+                DATABASE_NAME = config_dict["database"].get('name')
+            if config_dict.get("tasks", []):
+                SRC_TASKS = config_dict.get("tasks", [])
+                print("Hello")
+            if config_dict.get("notifiers", []):
+                SRC_NOTIFIERS = config_dict.get("notifiers", [])
         except:
             logger.exception("Failed to load info from configuration file.")
 
