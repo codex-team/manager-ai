@@ -49,11 +49,11 @@ class Controller:
         return task_class_name
 
     @classmethod
-    def get_task_class(cls, task_class_name: str):
+    def _get_task_class(cls, task_class_name: str):
         """
         Looking for class by task name.
         Example:
-             get_task_class("HelloWorldTask") -> :class:`HelloWorldTask`
+             _get_task_class("HelloWorldTask") -> :class:`HelloWorldTask`
         :param task_class_name: name of task class
         :return: TaskBase class implementation or None [If task class for `scenario_name` is not found]
         """
@@ -81,7 +81,7 @@ class Controller:
         tasks = []
         for src_task in src_tasks:
             task_class_name = cls._create_task_class_name(src_task.get("scenario"))
-            task_class = cls.get_task_class(task_class_name)
+            task_class = cls._get_task_class(task_class_name)
             src_task.update({"notifiers": src_notifiers})
             if task_class is None:
                 logger.exception(f"Wrong scenario for {src_task.get('name', 'task')}")
@@ -92,7 +92,7 @@ class Controller:
         return tasks
 
     @classmethod
-    def add_tasks(cls, task: BaseTask):
+    def _add_tasks(cls, task: BaseTask):
         """
         Adds task to scheduler
 
@@ -123,7 +123,7 @@ class Controller:
         logger.info(f"Found {len(tasks)} new tasks in {CONFIG_FILE_PATH}")
 
         for task in tasks:
-            cls.add_tasks(task)
+            cls._add_tasks(task)
 
         scheduler.start()
 
