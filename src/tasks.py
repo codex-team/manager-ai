@@ -9,6 +9,7 @@ class TaskWrapper:
 
     def run(self):
         """Executes the task, namely checks and, if necessary, sends data."""
+
         # TODO: implement this method when creating the controller
         pass
 

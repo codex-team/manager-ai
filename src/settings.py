@@ -69,7 +69,6 @@ if path.exists(CONFIG_FILE_PATH):
                 DATABASE_NAME = config_dict["database"].get('name')
             if config_dict.get("tasks", []):
                 SRC_TASKS = config_dict.get("tasks", [])
-                print("Hello")
             if config_dict.get("notifiers", []):
                 SRC_NOTIFIERS = config_dict.get("notifiers", [])
         except:

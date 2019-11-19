@@ -6,9 +6,10 @@ import requests
 from lxml import html
 
 from src.settings import MONGO_CLIENT, DATABASE_NAME
+from src.tasks import TaskWrapper
 
 
-class XPathScenario:
+class XPathScenario(TaskWrapper):
     """
     A class representing a scenario in which you need to get an html element by xpath
     from specified web page and save its string representation and timestamp
@@ -38,21 +39,21 @@ class XPathScenario:
 
     XPATH_COLLECTION = MONGO_CLIENT[DATABASE_NAME]["xpath_collection"]
 
-    def __init__(self, params: dict):
+    def __init__(self,  **kwargs):
         """Initialize XPathScenario.
 
         :param params: A dictionary with initial parameters for XPathScenario
             object. It must contain 'url' and 'xpath' keys.
         """
-
+        TaskWrapper.__init__(self, **kwargs)
         try:
-            self.url = params['url']
-            self.xpath = params['xpath']
+            self.url = kwargs["xpath"]["url"]
+            self.xpath = kwargs['xpath']["xpath"]
         except (KeyError, TypeError):
             raise TypeError("Illegal initial argument given. Expected 'dict' "
                             "with keys 'url' and 'xpath'.")
 
-        self.proxies = params.get('proxies')
+        self.proxies = kwargs.get('proxies')
         self.timestamp_id: str = self.__get_hash(self.url + self.xpath)
 
     def get_element(self, document: str):
@@ -140,3 +141,6 @@ class XPathScenario:
             return False
 
         return True
+
+
+export = XPathScenario

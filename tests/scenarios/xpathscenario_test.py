@@ -1,6 +1,6 @@
 import unittest
 import httpretty
-from src.scenarios.xpathscenario import XPathScenario
+from src.scenarios.xpath import XPathScenario
 
 SAMPLE_BODY = r"""
 <html>

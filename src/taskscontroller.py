@@ -1,10 +1,11 @@
-from typing import Tuple, List, Union
+from typing import List, Union
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
+from src.settings import *
+from importlib import import_module
 
 from src.tasks import TaskWrapper
-from src.settings import *
 
 logger = getLogger("general")
 scheduler = BlockingScheduler()
@@ -23,7 +24,9 @@ class TasksController:
         # TODO: write normal wrapping data to TaskWrapper when creating the controller
         tasks = []
         for src in SRC_TASKS:
-            tasks.append((TaskWrapper(**src)))
+            scenario = import_module("src.scenarios."+src["scenario"])
+            task = scenario.export
+            tasks.append(task(**src))
 
         TaskWrapper.notifiers = SRC_NOTIFIERS
         return tasks
