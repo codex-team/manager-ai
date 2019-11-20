@@ -1,6 +1,6 @@
 tasks:
   # task name
-  - name: "Check last telegram post date"
+- name: "Check last telegram post date"
 
   # string for scheduling in crontab-like syntax (see https://crontab.guru).
   schedule: "29 13-20 * * 1-5"
@@ -8,7 +8,7 @@ tasks:
   # scenario type
   scenario: "xpath"
 
-  # path to file wuth messages list to be send
+  # path to file with messages list to be send
   messages: "./messages.yml"
 
   # page that will be parsed
@@ -29,10 +29,12 @@ tasks:
       time: 40000
 
 notifiers:
-  - name: "Telegram"
+
+- name: "Telegram"
   type: "telegram"
   webhook: "https://notify.bot.codex.so/u/R4ND0M"
-    - name: "Work Email"
+
+- name: "Work Email"
   type: "email"
   address: "work@me.ru"
 
