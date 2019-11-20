@@ -2,9 +2,9 @@ import unittest
 import sys
 from logging import getLogger
 from io import StringIO
-from src.tasks import BaseTask, HelloWorldTask
+
 from src.controller import Controller
-from src.settings import SRC_NOTIFIERS
+from src.tasks.hello_world import HelloWorldTask
 
 logger = getLogger("test")
 
