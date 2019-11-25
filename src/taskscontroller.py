@@ -24,9 +24,9 @@ class TasksController:
         # TODO: write normal wrapping data to TaskWrapper when creating the controller
         tasks = []
         for src in SRC_TASKS:
-            scenario = import_module("src.scenarios."+src["scenario"])
-            task = scenario.export
-            tasks.append(task(**src))
+            scenario = import_module("src.scenarios.__init__")
+            task = getattr(scenario, "export_{0}".format(src["scenario"]))
+            tasks.append(task(src))
 
         TaskWrapper.notifiers = SRC_NOTIFIERS
         return tasks
@@ -57,7 +57,7 @@ class TasksController:
             [serialized_task],
             replace_existing=True
         )
-        logger.info(f"Added new periodic task: #{task.name}")
+        logger.info(f"Added new periodic task: #{task.src['name']}")
 
     def run(self):
         """Gets tasks, adds them to the scheduler, and launches"""

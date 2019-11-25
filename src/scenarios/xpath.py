@@ -39,21 +39,21 @@ class XPathScenario(TaskWrapper):
 
     XPATH_COLLECTION = MONGO_CLIENT[DATABASE_NAME]["xpath_collection"]
 
-    def __init__(self,  **kwargs):
+    def __init__(self,  src):
         """Initialize XPathScenario.
 
         :param params: A dictionary with initial parameters for XPathScenario
             object. It must contain 'url' and 'xpath' keys.
         """
-        TaskWrapper.__init__(self, **kwargs)
+        TaskWrapper.__init__(self, src)
         try:
-            self.url = kwargs["xpath"]["url"]
-            self.xpath = kwargs['xpath']["xpath"]
+            self.url = src["xpath"]["url"]
+            self.xpath = src['xpath']["xpath"]
         except (KeyError, TypeError):
             raise TypeError("Illegal initial argument given. Expected 'dict' "
                             "with keys 'url' and 'xpath'.")
 
-        self.proxies = kwargs.get('proxies')
+        self.proxies = src.get('proxies')
         self.timestamp_id: str = self.__get_hash(self.url + self.xpath)
 
     def get_element(self, document: str):
