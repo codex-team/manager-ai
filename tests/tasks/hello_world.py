@@ -45,7 +45,7 @@ class TestBaseTask(unittest.TestCase):
 
     def test_deserialize(self):
         task: HelloWorldTask = self.tasks[0]
-        serialized_task = task.serialize(full=True)
+        serialized_task = task.serialize()
         deserialized_task: HelloWorldTask = HelloWorldTask.deserialize(serialized_task, HelloWorldTask)
         self.assertEqual(deserialized_task, task)
 
