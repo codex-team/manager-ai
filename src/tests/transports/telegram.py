@@ -1,6 +1,6 @@
 import unittest
 import httpretty
-from src.transports.telegram import transport_telegram
+from transports.telegram import transport_telegram
 
 
 class TestTransportTelegram(unittest.TestCase):

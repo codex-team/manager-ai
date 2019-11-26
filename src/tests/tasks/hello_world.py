@@ -3,8 +3,8 @@ import sys
 from logging import getLogger
 from io import StringIO
 
-from src.controller import Controller
-from src.tasks.hello_world import HelloWorldTask
+from controller import Controller
+from tasks.hello_world import HelloWorldTask
 
 logger = getLogger("test")
 
