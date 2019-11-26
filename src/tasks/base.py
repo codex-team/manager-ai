@@ -6,29 +6,23 @@ class TaskException(Exception):
 class BaseTask:
     """Base task wrapper"""
 
-    __notifiers = None
-
-    def __init__(self, name, schedule, notifiers=None, **kwargs):
+    def __init__(self, name, schedule, transport, scenario, **kwargs):
         # TODO: explicitly specify the parameters that are used in all tasks
         self.name = name
-        self._arg_names = list(kwargs.keys()) + ["name", "schedule"]  # saving arg names for serialization
-        self._other_arg_names = ["_BaseTask__notifiers"]
+        self.transport = transport
+        self.scenario = scenario
+        self._arg_names = list(kwargs.keys()) + ["name", "scenario", "schedule", "transport"]  # saving arg names for serialization
         self.__dict__.update(kwargs)  # setting all the passed parameters
         self.schedule = schedule
 
-        if self.__class__._BaseTask__notifiers is None:
-            if notifiers is None and kwargs.get("_BaseTask__notifiers") is not None:
-                notifiers = kwargs.get("_BaseTask__notifiers")
-            self.__class__._BaseTask__notifiers = notifiers
 
     def run(self):
         """
         Executes the task. Base class level.
-        :raise TaskException: If notifiers are not specified
+
         :raise NotImplementedError: If `_run` method is not implemented
         """
-        if self.__class__._BaseTask__notifiers is None:
-            raise TaskException("You did not specify notifiers, use BaseTask.set_notifiers method")
+        # TODO: add some checks here
         self._run()
 
     def _run(self):
@@ -44,20 +38,17 @@ class BaseTask:
         serialized_task = {}
         for key in self._arg_names:
             serialized_task.update({key: self.__getattribute__(key)})
-        if not full:
-            return serialized_task
 
-        for key in self._other_arg_names:
-            serialized_task.update({key: getattr(self, key, getattr(self.__class__, key))})
         return serialized_task
 
     @classmethod
-    def deserialize(cls, kwargs: dict) -> "BaseTask":
+    def deserialize(cls, kwargs: dict, task_class) -> "BaseTask":
         """Deserializes task
 
+        :param task_class: task class
         :param kwargs: dict with src task fields
         """
-        return cls(**kwargs)
+        return task_class(**kwargs)
 
     def __eq__(self, other):
         if other is None or type(other) is not type(self):

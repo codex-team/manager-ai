@@ -61,7 +61,6 @@ MONGO_PORT = MongoClient.PORT
 DATABASE_NAME = "manager"
 
 SRC_TASKS = None
-SRC_NOTIFIERS = None
 
 # load db settings from configuration file
 if path.exists(CONFIG_FILE_PATH):
@@ -82,9 +81,6 @@ if path.exists(CONFIG_FILE_PATH):
 
             if config_dict.get("tasks", []):
                 SRC_TASKS = config_dict.get("tasks", [])
-
-            if config_dict.get("notifiers", []):
-                SRC_NOTIFIERS = config_dict.get("notifiers", [])
         except:
             logger.exception("Failed to load info from configuration file.")
 

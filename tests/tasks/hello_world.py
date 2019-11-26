@@ -9,28 +9,14 @@ from src.tasks.hello_world import HelloWorldTask
 logger = getLogger("test")
 
 _src_config = {
-    "tasks": [
-        {
+    "tasks": {
+        "HelloWorld": {
             "name": "Hello World",
-            "schedule": "* * * * 1",
+            "schedule": "1 2 3 4 5",
             "scenario": "hello_world",
-            "notifier": "stdout writer"
+            "transport": "stdout"
         },
-    ],
-    "notifiers": [
-        {
-            "name": "Telegram",
-            "type": "telegram",
-            "webhook": "https://notify.bot.codex.so/u/R4ND0M"
-        }, {
-            "name": "Work Email",
-            "type": "email",
-            "address": "work@me.ru"
-        }, {
-            "name": "stdout writer",
-            "type": "stdout"
-        }
-    ]
+    }
 }
 
 
@@ -40,7 +26,7 @@ class TestBaseTask(unittest.TestCase):
     """
 
     def setUp(self):
-        self.tasks = Controller.get_tasks(src_tasks=_src_config.get("tasks"), src_notifiers=_src_config.get("notifiers"))
+        self.tasks = Controller.get_tasks(src_tasks=_src_config.get("tasks"))
         assert self.tasks, "Wrong config"
         self.saved_stdout, sys.stdout = sys.stdout, StringIO()
 
@@ -54,13 +40,13 @@ class TestBaseTask(unittest.TestCase):
     def test_serialize(self):
         task: HelloWorldTask = self.tasks[0]
         current_result = task.serialize()
-        right_result = _src_config.get("tasks")[0]
+        right_result = list(_src_config.get("tasks").values())[0]
         self.assertEqual(current_result, right_result)
 
     def test_deserialize(self):
         task: HelloWorldTask = self.tasks[0]
         serialized_task = task.serialize(full=True)
-        deserialized_task: HelloWorldTask = HelloWorldTask.deserialize(serialized_task)
+        deserialized_task: HelloWorldTask = HelloWorldTask.deserialize(serialized_task, HelloWorldTask)
         self.assertEqual(deserialized_task, task)
 
     def tearDown(self):

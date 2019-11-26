@@ -1,6 +1,6 @@
 from copy import deepcopy
 from importlib import import_module
-from typing import Tuple, List, Union
+from typing import Tuple, List, Union, Dict
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -17,8 +17,6 @@ class Controller:
     A class that parses a configuration file,
     sets tasks to be executed using apscheduler
     """
-
-    _notifiers = SRC_NOTIFIERS
 
     @classmethod
     def _create_task_class_name(cls, task_name):
@@ -46,8 +44,7 @@ class Controller:
         """
 
         try:
-            task_class = getattr(import_module("src.tasks." + scenario_name),
-                                 cls._create_task_class_name(scenario_name), None)
+            task_class = getattr(import_module("src.tasks." + scenario_name), cls._create_task_class_name(scenario_name), None)
         except ModuleNotFoundError:
             task_class = None
 
@@ -62,7 +59,8 @@ class Controller:
         :param serialized_task: dict consisting of primitive types
         """
 
-        task = BaseTask.deserialize(serialized_task)
+        task_class = cls._get_task_class(serialized_task.get("scenario"))
+        task = BaseTask.deserialize(serialized_task, task_class)
         logger.info(f"Started task processing <{serialized_task['name']}>")
         try:
             task.run()
@@ -70,25 +68,21 @@ class Controller:
             logger.exception(f"Failed to complete task <{serialized_task['name']}>: {e}")
 
     @classmethod
-    def get_tasks(cls, src_tasks: List[dict] = SRC_TASKS,
-                  src_notifiers: List[dict] = SRC_NOTIFIERS) -> Union[List[BaseTask], None]:
+    def get_tasks(cls, src_tasks: Dict[str, dict] = SRC_TASKS) -> Union[List[BaseTask], None]:
         """
         Wraps src src_tasks in a wrapper class, creates a crontab and returns
         a list that contains :class:`BaseTask` objects.
         """
 
         src_tasks = deepcopy(src_tasks)
-        cls._notifiers = src_notifiers
 
-        if not src_tasks or type(src_tasks) is not list:
+        if not src_tasks or type(src_tasks) is not dict:
             logger.exception(f"Wrong tasks src_tasks")
             return None
 
-        # TODO: write normal wrapping src_tasks to BaseTask when creating the controller
         tasks = []
-        for src_task in src_tasks:
+        for src_task in src_tasks.values():
             task_class = cls._get_task_class(src_task.get("scenario"))
-            src_task.update({"notifiers": src_notifiers})
             if task_class is None:
                 logger.exception(f"Wrong scenario for {src_task.get('name', 'task')}")
                 continue
@@ -118,10 +112,6 @@ class Controller:
     @classmethod
     def run(cls):
         """Gets tasks, adds them to the scheduler, and launches"""
-
-        if not SRC_NOTIFIERS:
-            logger.error(f"Notifiers are not specified.")
-            return None
 
         logger.info(f"Run manager-ai")
         tasks = cls.get_tasks()
