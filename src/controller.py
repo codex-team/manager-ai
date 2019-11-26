@@ -1,15 +1,11 @@
 from copy import deepcopy
 from importlib import import_module
-from typing import Tuple, List, Union, Dict
+from typing import List, Union
 
-from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from src.settings import *
-from src.tasks.base import BaseTask
-
-scheduler = BlockingScheduler()
-scheduler.configure(**SCHEDULER)
+from settings import *
+from tasks.base import BaseTask
 
 
 class Controller:
@@ -17,6 +13,7 @@ class Controller:
     A class that parses a configuration file,
     sets tasks to be executed using apscheduler
     """
+    scheduler = None
 
     @classmethod
     def _create_task_class_name(cls, task_name):
@@ -44,7 +41,8 @@ class Controller:
         """
 
         try:
-            task_class = getattr(import_module("src.tasks." + scenario_name), cls._create_task_class_name(scenario_name), None)
+            task_class = getattr(import_module(f"tasks.{scenario_name}"),
+                                 cls._create_task_class_name(scenario_name), None)
         except ModuleNotFoundError:
             task_class = None
 
@@ -101,13 +99,17 @@ class Controller:
 
         schedule = task.schedule
         serialized_task = task.serialize()
-        scheduler.add_job(
+        cls.scheduler.add_job(
             cls.task_handler,
             CronTrigger.from_crontab(schedule),
             [serialized_task],
             replace_existing=True
         )
         logger.info(f"Added new periodic task: <{task.name}>")
+
+    @classmethod
+    def init_scheduler(cls, scheduler):
+        cls.scheduler = scheduler
 
     @classmethod
     def run(cls):
@@ -121,9 +123,4 @@ class Controller:
         for task in tasks:
             cls._add_tasks(task)
 
-        scheduler.start()
-
-
-if __name__ == "__main__":
-    controller = Controller()
-    controller.run()
+        cls.scheduler.start()
