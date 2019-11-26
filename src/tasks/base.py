@@ -18,17 +18,9 @@ class BaseTask:
 
     def run(self):
         """
-        Executes the task. Base class level.
+        Executes the task.
 
-        :raise NotImplementedError: If `_run` method is not implemented
-        """
-        # TODO: add some checks here
-        self._run()
-
-    def _run(self):
-        """
-        Executes the task. Implemented class level.
-        :raise NotImplementedError: If `_run` method is not implemented
+        :raise NotImplementedError: If this method is not implemented
         """
         raise NotImplementedError("Implement this method in an inherited class")
 

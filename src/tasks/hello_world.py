@@ -9,7 +9,7 @@ class HelloWorldTask(BaseTask):
         logger.info(f"Notifies about {self.name} task by stdout_notify")
         print(message)
 
-    def _run(self) -> None:
+    def run(self) -> None:
         """Task execution logic"""
 
         logger.info(f"Executes {self.name} task")
