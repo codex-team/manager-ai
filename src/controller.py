@@ -15,42 +15,63 @@ scheduler.configure(**SCHEDULER)
 class Controller:
     """
     A class that parses a configuration file,
-    sets tasks to be executed using apscheduler
+    sets tasks to be executed using apscheduler.
     """
 
     @classmethod
-    def _create_task_class_name(cls, task_name):
+    def _create_class_name(cls, module_name: str, class_type: str):
         """
-        Create task class name.
+        Create {class_type} class name by its {module_name}.
         Example:
-             controller._create_task_class_name("hello_world") -> "HelloWorldTask"
+             controller._create_class_name("hello_world", "Task") -> "HelloWorldTask"
 
-        :param task_name: name of a task class file
+        :param module_name: name of the module
+        :param class_type: type of the class (Task / Notifier)
         """
 
-        task_class_name = f"{''.join(word.title() for word in task_name.split('_'))}Task"
-        return task_class_name
+        class_name = f"{''.join(word.title() for word in module_name.split('_'))}{class_type.title()}"
+        return class_name
 
     @classmethod
-    def _get_task_class(cls, scenario_name: str):
+    def _get_class(cls, folder: str, module_name: str, class_name: str):
         """
-        Get reference to a task class by its file name (scenario).
-        Example:
-             _get_task_class("hello_world") -> :class:`HelloWorldTask`
+        Get reference to a class.
+            Example:
+                 _get_class("src.tasks", "hello_world", "HelloWorldTask") ->
+                                                        :class:`src.tasks.hello_world.HelloWorldTask`
 
-        :param scenario_name: name of the file with task class
+        :param folder: name of the folder with class module
+        :param module_name: name of the class module
+        :param class_name: name of the class
 
-        :return: TaskBase class implementation or None [If task class for `scenario_name` is not found]
+        :return: Ref to a class or None [If class is not found]
         """
 
         try:
-            task_class = getattr(import_module("src.tasks." + scenario_name), cls._create_task_class_name(scenario_name), None)
+            _class = getattr(import_module(f"{folder}.{module_name}"),
+                             class_name, None)
         except ModuleNotFoundError:
-            task_class = None
+            _class = None
 
-        if task_class is None:
-            logger.error(f"Task class for '{scenario_name}' not found.")
-        return task_class
+        if not _class:
+            logger.error(f"{class_name} not found in '{folder}.{module_name}'.")
+            return None
+
+        return _class
+
+    @classmethod
+    def _get_task_class(cls, scenario_name: str):
+        """Get reference to a task class by scenario name."""
+
+        return cls._get_class("src.tasks", scenario_name,
+                              cls._create_class_name(scenario_name, "Task"))
+
+    @classmethod
+    def _get_notifier_class(cls, notifier_name: str):
+        """Get reference to a notifier class by its name."""
+
+        return cls._get_class("src.transports", notifier_name,
+                              cls._create_class_name(notifier_name, "Notifier"))
 
     @classmethod
     def task_handler(cls, serialized_task: dict):
@@ -66,6 +87,9 @@ class Controller:
             task.run()
         except Exception as e:
             logger.exception(f"Failed to complete task <{serialized_task['name']}>: {e}")
+            return
+
+        logger.info(f"Finished task processing <{serialized_task['name']}>")
 
     @classmethod
     def get_tasks(cls, src_tasks: Dict[str, dict] = SRC_TASKS) -> Union[List[BaseTask], None]:
@@ -84,15 +108,21 @@ class Controller:
         for src_task in src_tasks.values():
             task_class = cls._get_task_class(src_task.get("scenario"))
             if task_class is None:
-                logger.exception(f"Wrong scenario for {src_task.get('name', 'task')}")
+                logger.error(f"Wrong scenario for <{src_task.get('name', 'task')}>.")
                 continue
 
+            task_notifier = cls._get_notifier_class(src_task.get("transport"))
+            if task_notifier is None:
+                logger.error(f"Wrong transport for <{src_task.get('name', 'task')}>.")
+                continue
+
+            src_task["transport"] = task_notifier
             tasks.append(task_class(**src_task))
 
         return tasks
 
     @classmethod
-    def _add_tasks(cls, task: BaseTask):
+    def _add_task(cls, task: BaseTask):
         """
         Adds task to scheduler
 
@@ -116,12 +146,15 @@ class Controller:
         logger.info(f"Run manager-ai")
         tasks = cls.get_tasks()
 
-        logger.info(f"Found {len(tasks)} new tasks in {CONFIG_FILE_PATH}")
+        if tasks:
+            logger.info(f"Found {len(tasks)} new tasks in {CONFIG_FILE_PATH}")
 
-        for task in tasks:
-            cls._add_tasks(task)
+            for task in tasks:
+                cls._add_task(task)
 
-        scheduler.start()
+            scheduler.start()
+        else:
+            logger.error(f"Failed to load tasks from {CONFIG_FILE_PATH}.")
 
 
 if __name__ == "__main__":
