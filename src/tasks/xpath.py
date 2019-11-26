@@ -6,10 +6,10 @@ import requests
 from lxml import html
 
 from src.settings import MONGO_CLIENT, DATABASE_NAME
-from src.tasks import TaskWrapper
+from src.tasks.base import BaseTask
 
 
-class XPathScenario(TaskWrapper):
+class XpathTask(BaseTask):
     """
     A class representing a scenario in which you need to get an html element by xpath
     from specified web page and save its string representation and timestamp
@@ -39,22 +39,15 @@ class XPathScenario(TaskWrapper):
 
     XPATH_COLLECTION = MONGO_CLIENT[DATABASE_NAME]["xpath_collection"]
 
-    def __init__(self,  src):
+    def __init__(self,  name, schedule, transport, scenario, **kwargs):
         """Initialize XPathScenario.
 
         :param params: A dictionary with initial parameters for XPathScenario
             object. It must contain 'url' and 'xpath' keys.
         """
-        TaskWrapper.__init__(self, src)
-        try:
-            self.url = src["xpath"]["url"]
-            self.xpath = src['xpath']["xpath"]
-        except (KeyError, TypeError):
-            raise TypeError("Illegal initial argument given. Expected 'dict' "
-                            "with keys 'url' and 'xpath'.")
+        BaseTask.__init__(self, name, schedule, transport, scenario, **kwargs)
 
-        self.proxies = src.get('proxies')
-        self.timestamp_id: str = self.__get_hash(self.url + self.xpath)
+        self.timestamp_id: str = self.__get_hash(self.xpath['url'] + self.xpath['xpath'])
 
     def get_element(self, document: str):
         """Searches for an html element in {document} by
@@ -65,7 +58,7 @@ class XPathScenario(TaskWrapper):
 
         tree = html.fromstring(document)
         try:
-            elem_lst = tree.xpath(self.xpath)
+            elem_lst = tree.xpath(self.xpath["xpath"])
         except:
             logging.exception("XPathError")
             # TODO: exception handling
@@ -80,9 +73,9 @@ class XPathScenario(TaskWrapper):
         :param url: URL for making GET request.
         """
 
-        url = url if url else self.url
+        url = url if url else self.xpath["url"]
         try:
-            response = requests.get(url, proxies=self.proxies)
+            response = requests.get(url)
         except requests.RequestException:
             logging.exception("Request error")
             # TODO: exception handling
@@ -141,6 +134,3 @@ class XPathScenario(TaskWrapper):
             return False
 
         return True
-
-
-export = XPathScenario
