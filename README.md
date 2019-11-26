@@ -54,3 +54,8 @@ The main idea of this project is an increasing of projects performance inside of
         type: "email"
         address: "work@me.ru"
 ```
+
+## Run in Docker
+1. Create file `config.docker.yml` with the content similar to `config.sample.yml`
+2. Change connection urls according to the Docker services (ex: ~~localhost:27017~~ `mongodb:27017`)
+3. Run `docker-compose up --build`
