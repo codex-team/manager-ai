@@ -35,6 +35,16 @@ class XpathTask(BaseTask):
         - xpath: xpath expression for searching element
         - proxies: dictionary with proxies to use for GET request
         - timestamp_id: id used to get document with element and its timestamp from XPATH_COLLECTION
+
+    Config example:
+         Xpath:
+            name: "Xpath"
+            schedule: "* * * * *"
+            scenario: "xpath"
+            xpath:
+                url: "https://docs.microsoft.com/ru-ru/windows/wsl/wsl2-install"
+                xpath: "/html/body/div[1]/div[2]/div[3]/ul"
+            transport: "stdout"
     """
 
     XPATH_COLLECTION = MONGO_CLIENT[DATABASE_NAME]["xpath_collection"]
@@ -42,10 +52,10 @@ class XpathTask(BaseTask):
     def __init__(self,  name, schedule, transport, scenario, **kwargs):
         """Initialize XPathScenario.
 
-        :param params: A dictionary with initial parameters for XPathScenario
-            object. It must contain 'url' and 'xpath' keys.
+        :param params: A name, schedule, transport, scenario of task and dick with xpath and url.
         """
         BaseTask.__init__(self, name, schedule, transport, scenario, **kwargs)
+        self._arg_names.append("timestamp_id")
 
         self.timestamp_id: str = self.__get_hash(self.xpath['url'] + self.xpath['xpath'])
 
