@@ -1,7 +1,7 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 from controller import Controller
-from src.settings import *
+from settings import *
 
 if __name__ == "__main__":
     scheduler = BlockingScheduler()

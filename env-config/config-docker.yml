@@ -1,0 +1,25 @@
+tasks:
+  HelloWorld:
+    # task name
+    name: "Hello World"
+
+    # string for scheduling in crontab-like syntax (see https://crontab.guru).
+    schedule: "* * * * *" # minute, hour, day, month, day_of_week
+
+    # scenario type
+    scenario: "hello_world"
+
+    # transport type
+    transport: "stdout"
+
+# database settings section (optional)
+database:
+  # hostname or IP address of a MongoDB instance to connect to
+  # see <https://api.mongodb.com/python/current/api/pymongo/mongo_client.html>
+  host: "mongodb"
+
+  # port of a MongoDB instance
+  port: 27017
+
+  # name of the database
+  name: "manager"

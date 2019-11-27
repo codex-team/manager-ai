@@ -42,7 +42,8 @@ class Controller:
 
         try:
             task_class = getattr(import_module(f"tasks.{scenario_name}"),
-                                 cls._create_task_class_name(scenario_name), None)
+                                 cls._create_task_class_name(scenario_name),
+                                 None)
         except ModuleNotFoundError:
             task_class = None
 

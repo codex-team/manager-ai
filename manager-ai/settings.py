@@ -53,7 +53,7 @@ logger = getLogger("general")
 PROXY: Dict[str, str] = None
 
 # path to the file with specified tasks and settings
-CONFIG_FILE_PATH = path.join(path.dirname(path.dirname(path.abspath(__file__))), "config.yml")
+CONFIG_FILE_PATH = path.join(path.dirname(path.abspath(__file__)), "config.yml")
 
 # default database settings
 MONGO_HOST = MongoClient.HOST

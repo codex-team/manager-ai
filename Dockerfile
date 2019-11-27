@@ -6,6 +6,6 @@ COPY requirements.txt /
 
 RUN pip install -r requirements.txt
 
-WORKDIR /home/manager-ai
+WORKDIR /home/manager-ai/manager-ai
 
-CMD ["python", "./src/main.py"]
+CMD ["python", "./manage.py"]

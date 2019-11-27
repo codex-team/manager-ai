@@ -4,7 +4,7 @@ services:
     build: .
     volumes:
       - .:/home/manager-ai/
-      - ./config.docker.yml:/home/manager-ai/config.yml
+      - ./env-config/config-docker.yml:/home/manager-ai/config.yml
     depends_on:
       - mongodb
 
