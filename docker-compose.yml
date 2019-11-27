@@ -4,12 +4,14 @@ services:
     build: .
     volumes:
       - .:/home/manager-ai/
-      - ./env-config/config-docker.yml:/home/manager-ai/config.yml
+      - ./env-config/config-docker.yml:/home/manager-ai/manager-ai/config.yml
     depends_on:
       - mongodb
 
   mongodb:
     image: mongo:4.2
+    volumes:
+      - mongodata:/data/db
     ports:
       - 27017:27017
 
