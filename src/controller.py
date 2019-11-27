@@ -82,6 +82,8 @@ class Controller:
 
         task_class = cls._get_task_class(serialized_task.get("scenario"))
         task = BaseTask.deserialize(serialized_task, task_class)
+        task.transport = cls._get_notifier_class(serialized_task.get("transport"))
+
         logger.info(f"Started task processing <{serialized_task['name']}>")
         try:
             task.run()
@@ -116,7 +118,6 @@ class Controller:
                 logger.error(f"Wrong transport for <{src_task.get('name', 'task')}>.")
                 continue
 
-            src_task["transport"] = task_notifier
             tasks.append(task_class(**src_task))
 
         return tasks
