@@ -41,7 +41,7 @@ class XpathTask(BaseTask):
             name: "Xpath"
             schedule: "* * * * *"
             scenario: "xpath"
-            xpath:
+            params:
                 url: "https://docs.microsoft.com/ru-ru/windows/wsl/wsl2-install"
                 xpath: "/html/body/div[1]/div[2]/div[3]/ul"
             transport: "stdout"
@@ -54,10 +54,10 @@ class XpathTask(BaseTask):
 
         :param params: A name, schedule, transport, scenario of task and dick with xpath and url.
         """
-        BaseTask.__init__(self, name, schedule, transport, scenario, **kwargs)
-        self._arg_names.append("timestamp_id")
+        super().__init__(name, schedule, transport, scenario, **kwargs)
+        self._arg_names.append("task_id")
 
-        self.timestamp_id: str = self.__get_hash(self.xpath['url'] + self.xpath['xpath'])
+        self.task_id: str = self.__get_hash(self.params['url'] + self.params['xpath'])
 
     def get_element(self, document: str):
         """Searches for an html element in {document} by
@@ -68,7 +68,7 @@ class XpathTask(BaseTask):
 
         tree = html.fromstring(document)
         try:
-            elem_lst = tree.xpath(self.xpath["xpath"])
+            elem_lst = tree.xpath(self.params["xpath"])
         except:
             logging.exception("XPathError")
             # TODO: exception handling
@@ -83,7 +83,7 @@ class XpathTask(BaseTask):
         :param url: URL for making GET request.
         """
 
-        url = url if url else self.xpath["url"]
+        url = url if url else self.params["url"]
         try:
             response = requests.get(url)
         except requests.RequestException:
@@ -131,12 +131,12 @@ class XpathTask(BaseTask):
             raise NotImplementedError()
 
         timestamp = {
-            "_id": self.timestamp_id,
+            "_id": self.task_id,
             "element": self.__get_hash(searched_element),
             "timestamp": datetime.now()
         }
 
-        old_timestamp = self.XPATH_COLLECTION.find_one({"_id": self.timestamp_id})
+        old_timestamp = self.XPATH_COLLECTION.find_one({"_id": self.task_id})
 
         # if there is no such element in collection
         if not old_timestamp:
