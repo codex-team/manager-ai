@@ -1,4 +1,4 @@
-from src.transports.base import BaseNotifier
+from src.notifiers.base import BaseNotifier
 
 
 class StdoutNotifier(BaseNotifier):

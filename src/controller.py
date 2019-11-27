@@ -70,7 +70,7 @@ class Controller:
     def _get_notifier_class(cls, notifier_name: str):
         """Get reference to a notifier class by its name."""
 
-        return cls._get_class("src.transports", notifier_name,
+        return cls._get_class("src.notifiers", notifier_name,
                               cls._create_class_name(notifier_name, "Notifier"))
 
     @classmethod
@@ -82,7 +82,7 @@ class Controller:
 
         task_class = cls._get_task_class(serialized_task.get("scenario"))
         task = BaseTask.deserialize(serialized_task, task_class)
-        task.transport = cls._get_notifier_class(serialized_task.get("transport"))
+        task.notifier = cls._get_notifier_class(serialized_task.get("notifier"))
 
         logger.info(f"Started task processing <{serialized_task['name']}>")
         try:
@@ -113,9 +113,9 @@ class Controller:
                 logger.error(f"Wrong scenario for <{src_task.get('name', 'task')}>.")
                 continue
 
-            task_notifier = cls._get_notifier_class(src_task.get("transport"))
+            task_notifier = cls._get_notifier_class(src_task.get("notifier"))
             if task_notifier is None:
-                logger.error(f"Wrong transport for <{src_task.get('name', 'task')}>.")
+                logger.error(f"Wrong notifier for <{src_task.get('name', 'task')}>.")
                 continue
 
             tasks.append(task_class(**src_task))
