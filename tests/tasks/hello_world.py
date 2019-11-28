@@ -4,6 +4,7 @@ from logging import getLogger
 from io import StringIO
 
 from src.controller import Controller
+from src.notifiers.stdout import StdoutNotifier
 from src.tasks.hello_world import HelloWorldTask
 
 logger = getLogger("test")
@@ -14,7 +15,7 @@ _src_config = {
             "name": "Hello World",
             "schedule": "1 2 3 4 5",
             "scenario": "hello_world",
-            "transport": "stdout"
+            "notifier": "stdout"
         },
     }
 }
@@ -32,6 +33,7 @@ class TestBaseTask(unittest.TestCase):
 
     def test_run(self):
         task: HelloWorldTask = self.tasks[0]
+        task.notifier = StdoutNotifier
         task.run()
         current_result = sys.stdout.getvalue().strip()
         right_result = "Hello World!"

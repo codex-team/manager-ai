@@ -44,17 +44,17 @@ class XpathTask(BaseTask):
             params:
                 url: "https://docs.microsoft.com/ru-ru/windows/wsl/wsl2-install"
                 xpath: "/html/body/div[1]/div[2]/div[3]/ul"
-            transport: "stdout"
+            notifier: "stdout"
     """
 
     XPATH_COLLECTION = MONGO_CLIENT[DATABASE_NAME]["xpath_collection"]
 
-    def __init__(self,  name, schedule, transport, scenario, **kwargs):
-        """Initialize XPathScenario.
+    def __init__(self, name, schedule, notifier, scenario, **kwargs):
+        """Initialize XPathTask.
 
-        :param params: A name, schedule, transport, scenario of task and dick with xpath and url.
+        :param params: A name, schedule, notifier, scenario of a task and dict with xpath and url.
         """
-        super().__init__(name, schedule, transport, scenario, **kwargs)
+        super().__init__(name, schedule, notifier, scenario, **kwargs)
         self._arg_names.append("task_id")
 
         self.task_id: str = self.__get_hash(self.params['url'] + self.params['xpath'])

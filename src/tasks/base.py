@@ -5,13 +5,13 @@ class TaskException(Exception):
 class BaseTask:
     """Base task wrapper"""
 
-    def __init__(self, name, schedule, transport, scenario, **kwargs):
+    def __init__(self, name, schedule, notifier, scenario, **kwargs):
         # TODO: explicitly specify the parameters that are used in all tasks
         self.name = name
-        self.transport = transport
+        self.notifier = notifier
         self.scenario = scenario
         self._arg_names = list(kwargs.keys()) + ["name", "scenario", "schedule",
-                                                 "transport"]  # saving arg names for serialization
+                                                 "notifier"]  # saving arg names for serialization
         self.__dict__.update(kwargs)  # setting all the passed parameters
         self.schedule = schedule
 
