@@ -18,8 +18,8 @@ class Controller:
     sets tasks to be executed using apscheduler.
     """
 
-    @classmethod
-    def _create_class_name(cls, module_name: str, class_type: str):
+    @staticmethod
+    def _create_class_name(module_name: str, class_type: str):
         """
         Create {class_type} class name by its {module_name}.
         Example:
@@ -32,8 +32,8 @@ class Controller:
         class_name = f"{''.join(word.title() for word in module_name.split('_'))}{class_type.title()}"
         return class_name
 
-    @classmethod
-    def _get_class(cls, folder: str, module_name: str, class_name: str):
+    @staticmethod
+    def _get_class(folder: str, module_name: str, class_name: str):
         """
         Get reference to a class.
             Example:
