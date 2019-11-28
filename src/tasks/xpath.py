@@ -40,6 +40,8 @@ class XpathTask(BaseTask):
          Xpath:
             name: "Xpath"
             schedule: "* * * * *"
+            notify_url: 'https://notify.bot.codex.so/u'
+            max_secs_without_changes: 200
             scenario: "xpath"
             params:
                 url: "https://docs.microsoft.com/ru-ru/windows/wsl/wsl2-install"
