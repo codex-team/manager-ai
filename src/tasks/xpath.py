@@ -6,9 +6,10 @@ import requests
 from lxml import html
 
 from src.settings import MONGO_CLIENT, DATABASE_NAME
+from src.tasks.base import BaseTask
 
 
-class XPathScenario:
+class XpathTask(BaseTask):
     """
     A class representing a scenario in which you need to get an html element by xpath
     from specified web page and save its string representation and timestamp
@@ -34,26 +35,29 @@ class XPathScenario:
         - xpath: xpath expression for searching element
         - proxies: dictionary with proxies to use for GET request
         - timestamp_id: id used to get document with element and its timestamp from XPATH_COLLECTION
+
+    Config example:
+         Xpath:
+            name: "Xpath"
+            schedule: "* * * * *"
+            scenario: "xpath"
+            params:
+                url: "https://docs.microsoft.com/ru-ru/windows/wsl/wsl2-install"
+                xpath: "/html/body/div[1]/div[2]/div[3]/ul"
+            transport: "stdout"
     """
 
     XPATH_COLLECTION = MONGO_CLIENT[DATABASE_NAME]["xpath_collection"]
 
-    def __init__(self, params: dict):
+    def __init__(self,  name, schedule, transport, scenario, **kwargs):
         """Initialize XPathScenario.
 
-        :param params: A dictionary with initial parameters for XPathScenario
-            object. It must contain 'url' and 'xpath' keys.
+        :param params: A name, schedule, transport, scenario of task and dick with xpath and url.
         """
+        super().__init__(name, schedule, transport, scenario, **kwargs)
+        self._arg_names.append("task_id")
 
-        try:
-            self.url = params['url']
-            self.xpath = params['xpath']
-        except (KeyError, TypeError):
-            raise TypeError("Illegal initial argument given. Expected 'dict' "
-                            "with keys 'url' and 'xpath'.")
-
-        self.proxies = params.get('proxies')
-        self.timestamp_id: str = self.__get_hash(self.url + self.xpath)
+        self.task_id: str = self.__get_hash(self.params['url'] + self.params['xpath'])
 
     def get_element(self, document: str):
         """Searches for an html element in {document} by
@@ -64,7 +68,7 @@ class XPathScenario:
 
         tree = html.fromstring(document)
         try:
-            elem_lst = tree.xpath(self.xpath)
+            elem_lst = tree.xpath(self.params["xpath"])
         except:
             logging.exception("XPathError")
             # TODO: exception handling
@@ -79,9 +83,9 @@ class XPathScenario:
         :param url: URL for making GET request.
         """
 
-        url = url if url else self.url
+        url = url if url else self.params["url"]
         try:
-            response = requests.get(url, proxies=self.proxies)
+            response = requests.get(url)
         except requests.RequestException:
             logging.exception("Request error")
             # TODO: exception handling
@@ -127,12 +131,12 @@ class XPathScenario:
             raise NotImplementedError()
 
         timestamp = {
-            "_id": self.timestamp_id,
+            "_id": self.task_id,
             "element": self.__get_hash(searched_element),
             "timestamp": datetime.now()
         }
 
-        old_timestamp = self.XPATH_COLLECTION.find_one({"_id": self.timestamp_id})
+        old_timestamp = self.XPATH_COLLECTION.find_one({"_id": self.task_id})
 
         # if there is no such element in collection
         if not old_timestamp:
