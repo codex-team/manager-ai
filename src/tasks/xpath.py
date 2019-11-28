@@ -56,7 +56,8 @@ class XpathTask(BaseTask):
         """
         super().__init__(name, schedule, notifier, scenario, **kwargs)
         self._arg_names.append("task_id")
-        print(kwargs)
+        self._arg_names.append("max_secs_without_changes")
+        self._arg_names.append("notify_url")
         self.task_id: str = self.__get_hash(self.params['url'] + self.params['xpath'])
 
     def get_element(self, document: str):
@@ -142,9 +143,6 @@ class XpathTask(BaseTask):
         if not old_timestamp:
             self.XPATH_COLLECTION.insert_one(timestamp)
             return False
-        print(self.XPATH_COLLECTION)
-        date = old_timestamp["timestamp"].strptime('2018-11-10 10:55:31', '%Y-%m-%d %H:%M:%S')
-        print(self.max_secs_witout_changes)
-        if date - datetime.now() >= self.max_secs_without_changes:
-            print("YES")
+        if (datetime.now() - old_timestamp["timestamp"]).seconds >= self.max_secs_without_changes:
+            print("I'm working")
         return True
