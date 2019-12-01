@@ -57,9 +57,7 @@ class XpathTask(BaseTask):
         :param params: A name, schedule, notifier, scenario of a task and dict with xpath and url.
         """
         super().__init__(name, schedule, notifier, scenario, **kwargs)
-        self._arg_names.append("task_id")
-        self._arg_names.append("max_secs_without_changes")
-        self._arg_names.append("notify_url")
+        self._arg_names += ["task_id", "max_secs_without_changes", "notify_url"]
         self.task_id: str = self.__get_hash(self.params['url'] + self.params['xpath'])
 
     def get_element(self, document: str):
