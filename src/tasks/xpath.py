@@ -40,6 +40,8 @@ class XpathTask(BaseTask):
          Xpath:
             name: "Xpath"
             schedule: "* * * * *"
+            notify_url: 'https://notify.bot.codex.so/u'
+            max_secs_without_changes: 200
             scenario: "xpath"
             params:
                 url: "https://docs.microsoft.com/ru-ru/windows/wsl/wsl2-install"
@@ -55,8 +57,7 @@ class XpathTask(BaseTask):
         :param params: A name, schedule, notifier, scenario of a task and dict with xpath and url.
         """
         super().__init__(name, schedule, notifier, scenario, **kwargs)
-        self._arg_names.append("task_id")
-
+        self._arg_names += ["task_id", "max_secs_without_changes", "notify_url"]
         self.task_id: str = self.__get_hash(self.params['url'] + self.params['xpath'])
 
     def get_element(self, document: str):
@@ -142,5 +143,6 @@ class XpathTask(BaseTask):
         if not old_timestamp:
             self.XPATH_COLLECTION.insert_one(timestamp)
             return False
-
+        if (datetime.now() - old_timestamp["timestamp"]).seconds >= self.max_secs_without_changes:
+            print("I'm working")
         return True
