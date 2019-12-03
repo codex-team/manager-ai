@@ -7,6 +7,7 @@ from lxml import html
 
 from src.settings import MONGO_CLIENT, DATABASE_NAME
 from src.tasks.base import BaseTask
+from src.messages_creator import create_message
 
 
 class XpathTask(BaseTask):
@@ -57,7 +58,7 @@ class XpathTask(BaseTask):
         :param params: A name, schedule, notifier, scenario of a task and dict with xpath and url.
         """
         super().__init__(name, schedule, notifier, scenario, **kwargs)
-        self._arg_names += ["task_id", "max_secs_without_changes", "notify_url"]
+        self._arg_names += ["task_id", "max_secs_without_changes", "notify_url", "messages_url"]
         self.task_id: str = self.__get_hash(self.params['url'] + self.params['xpath'])
 
     def get_element(self, document: str):
@@ -145,5 +146,5 @@ class XpathTask(BaseTask):
             return False
         if (datetime.now() - old_timestamp["timestamp"]).seconds >= self.max_secs_without_changes:
             notifier = self.notifier(self.notify_url)
-            notifier.notify("Hello")
+            notifier.notify(create_message(self.messages_url))
         return True
