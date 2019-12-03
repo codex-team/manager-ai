@@ -150,10 +150,17 @@ class Controller:
         if tasks:
             logger.info(f"Found {len(tasks)} new tasks in {CONFIG_FILE_PATH}")
 
+            if MONGO_CLIENT[DATABASE_NAME]["jobs"].count_documents({}) > 0:
+                MONGO_CLIENT[DATABASE_NAME]["jobs"].drop()
+
             for task in tasks:
                 cls._add_task(task)
 
-            scheduler.start()
+            try:
+                scheduler.start()
+            except (KeyboardInterrupt, SystemExit):
+                logger.info("Finish manager-ai")
+                scheduler.shutdown()
         else:
             logger.error(f"Failed to load tasks from {CONFIG_FILE_PATH}.")
 
