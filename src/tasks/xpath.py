@@ -144,5 +144,6 @@ class XpathTask(BaseTask):
             self.XPATH_COLLECTION.insert_one(timestamp)
             return False
         if (datetime.now() - old_timestamp["timestamp"]).seconds >= self.max_secs_without_changes:
-            print("I'm working")
+            notifier = self.notifier(self.notify_url)
+            notifier.notify("Hello")
         return True

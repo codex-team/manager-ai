@@ -12,6 +12,7 @@ class HelloWorldTask(BaseTask):
 
         logger.info(f"Executes {self.name} task")
         sleep(1)
-        self.notifier.notify("Hello World!")
+        notifier = self.notifier()
+        notifier.notify("Hello World!")
 
         return None

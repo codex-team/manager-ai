@@ -1,8 +1,7 @@
 class BaseNotifier:
     """Base notifier class."""
 
-    @staticmethod
-    def notify(message):
+    def notify(self, message):
         """
         Base method for sending notifications.
         Must be implemented in inherited classes.
