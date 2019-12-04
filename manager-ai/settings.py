@@ -16,7 +16,7 @@ LOGGING = {
     "disable_existing_loggers": True,
     "formatters": {
         "simple": {
-            "format": "(%(process)d) %(asctime)s %(name)s (line %(lineno)s) %(levelname)s %(message)s",
+            "format": "(%(process)d) %(asctime)s %(name)s (%(module)s:%(lineno)s) %(levelname)s %(message)s",
             "datefmt": "%y %b %d, %H:%M:%S",
         },
     },

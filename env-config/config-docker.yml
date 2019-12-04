@@ -10,7 +10,7 @@ tasks:
     scenario: "hello_world"
 
     # transport type
-    transport: "stdout"
+    notifier: "stdout"
 
 # database settings section (optional)
 database:
