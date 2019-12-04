@@ -27,7 +27,7 @@ The main idea of this project is an increasing of projects performance inside of
         scenario: "xpath"
         
         # path to file wuth messages list to be send
-        messages: "./messages.yml"
+        messages: messages.sample.yml
         
         # page that will be parsed
         url: "https://t.me/s/codex_team"
