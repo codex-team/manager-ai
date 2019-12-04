@@ -1,4 +1,4 @@
-from src.notifiers.base import BaseNotifier
+from notifiers.base import BaseNotifier
 
 
 class StdoutNotifier(BaseNotifier):

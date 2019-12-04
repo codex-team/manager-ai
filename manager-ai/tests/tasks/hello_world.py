@@ -3,9 +3,9 @@ import sys
 from logging import getLogger
 from io import StringIO
 
-from src.controller import Controller
-from src.notifiers.stdout import StdoutNotifier
-from src.tasks.hello_world import HelloWorldTask
+from controller import Controller
+from notifiers.stdout import StdoutNotifier
+from tasks.hello_world import HelloWorldTask
 
 logger = getLogger("test")
 

@@ -2,14 +2,10 @@ from copy import deepcopy
 from importlib import import_module
 from typing import List, Union
 
-from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from src.settings import *
-from src.tasks.base import BaseTask
-
-scheduler = BlockingScheduler()
-scheduler.configure(**SCHEDULER)
+from settings import *
+from tasks.base import BaseTask
 
 
 class Controller:
@@ -17,6 +13,7 @@ class Controller:
     A class that parses a configuration file,
     sets tasks to be executed using apscheduler.
     """
+    scheduler = None
 
     @staticmethod
     def _create_class_name(module_name: str, class_type: str):
@@ -48,8 +45,7 @@ class Controller:
         """
 
         try:
-            _class = getattr(import_module(f"{folder}.{module_name}"),
-                             class_name, None)
+            _class = getattr(import_module(f"{folder}.{module_name}"), class_name, None)
         except ModuleNotFoundError:
             _class = None
 
@@ -63,15 +59,13 @@ class Controller:
     def _get_task_class(cls, scenario_name: str):
         """Get reference to a task class by scenario name."""
 
-        return cls._get_class("src.tasks", scenario_name,
-                              cls._create_class_name(scenario_name, "Task"))
+        return cls._get_class("tasks", scenario_name, cls._create_class_name(scenario_name, "task"))
 
     @classmethod
     def _get_notifier_class(cls, notifier_name: str):
         """Get reference to a notifier class by its name."""
 
-        return cls._get_class("src.notifiers", notifier_name,
-                              cls._create_class_name(notifier_name, "Notifier"))
+        return cls._get_class("notifiers", notifier_name, cls._create_class_name(notifier_name, "notifier"))
 
     @classmethod
     def task_handler(cls, serialized_task: dict):
@@ -132,7 +126,7 @@ class Controller:
 
         schedule = task.schedule
         serialized_task = task.serialize()
-        scheduler.add_job(
+        cls.scheduler.add_job(
             cls.task_handler,
             CronTrigger.from_crontab(schedule),
             [serialized_task],
@@ -141,30 +135,32 @@ class Controller:
         logger.info(f"Added new periodic task: <{task.name}>")
 
     @classmethod
+    def init_scheduler(cls, scheduler):
+        cls.scheduler = scheduler
+
+    @classmethod
     def run(cls):
         """Gets tasks, adds them to the scheduler, and launches"""
 
         logger.info(f"Run manager-ai")
         tasks = cls.get_tasks()
 
-        if tasks:
-            logger.info(f"Found {len(tasks)} new tasks in {CONFIG_FILE_PATH}")
+        logger.info(f"Found {len(tasks)} new tasks in {CONFIG_FILE_PATH}")
 
-            if MONGO_CLIENT[DATABASE_NAME]["jobs"].count_documents({}) > 0:
+        if tasks:
+            old_tasks_count = MONGO_CLIENT[DATABASE_NAME]["jobs"].count_documents({})
+            if old_tasks_count > 0:
                 MONGO_CLIENT[DATABASE_NAME]["jobs"].drop()
+                logger.info(f"Deleted {old_tasks_count} old task from DB")
 
             for task in tasks:
                 cls._add_task(task)
 
             try:
-                scheduler.start()
+                cls.scheduler.start()
             except (KeyboardInterrupt, SystemExit):
                 logger.info("Finish manager-ai")
-                scheduler.shutdown()
+                cls.scheduler.shutdown()
         else:
             logger.error(f"Failed to load tasks from {CONFIG_FILE_PATH}.")
 
-
-if __name__ == "__main__":
-    controller = Controller()
-    controller.run()

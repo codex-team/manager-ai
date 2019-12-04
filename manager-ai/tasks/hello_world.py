@@ -1,7 +1,7 @@
 from time import sleep
 
-from src.settings import logger
-from src.tasks.base import BaseTask
+from settings import logger
+from tasks.base import BaseTask
 
 
 class HelloWorldTask(BaseTask):

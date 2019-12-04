@@ -10,8 +10,8 @@ class BaseTask:
         self.name = name
         self.notifier = notifier
         self.scenario = scenario
-        self._arg_names = list(kwargs.keys()) + ["name", "scenario", "schedule",
-                                                 "notifier"]  # saving arg names for serialization
+        self._arg_names = list(kwargs.keys()) +\
+                          ["name", "scenario", "schedule", "notifier"]  # saving arg names for serialization
         self.__dict__.update(kwargs)  # setting all the passed parameters
         self.schedule = schedule
 

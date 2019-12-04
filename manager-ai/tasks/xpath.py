@@ -5,8 +5,8 @@ from hashlib import md5 as make_hash
 import requests
 from lxml import html
 
-from src.settings import MONGO_CLIENT, DATABASE_NAME
-from src.tasks.base import BaseTask
+from settings import MONGO_CLIENT, DATABASE_NAME
+from tasks.base import BaseTask
 
 
 class XpathTask(BaseTask):

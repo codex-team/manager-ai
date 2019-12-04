@@ -1,6 +1,6 @@
 import unittest
 import httpretty
-from src.notifiers.telegram import transport_telegram
+from notifiers.telegram import transport_telegram
 
 
 class TestTransportTelegram(unittest.TestCase):

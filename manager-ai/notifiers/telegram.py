@@ -2,7 +2,7 @@ import logging
 
 import requests
 from retrying import retry
-from src.notifiers.base import BaseNotifier
+from notifiers.base import BaseNotifier
 
 
 def retry_if_connection_error(exception):
@@ -14,7 +14,7 @@ class TelegramNotifier(BaseNotifier):
     def __init__(self, webhook):
         self.webhook = webhook
 
-    @retry(retry_on_exception=retry_if_connection_error, stop_max_attempt_number=3)# retry if ConnectingError error for 3 time
+    @retry(retry_on_exception=retry_if_connection_error, stop_max_attempt_number=3)  # retry if ConnectingError error for 3 time
     def notify(self, message):
         """
         Method for delivering a message in telegram
