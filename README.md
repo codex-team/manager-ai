@@ -2,23 +2,31 @@
 
 The main idea of this project is an increasing of projects performance inside of a little team. 
 
-## Quick start
- 1) create config/local_settings.py file (check config/local_settings.sample) and set or redefine_default configs in it
- 2) install requirements and start script or just launch the docker container
-
-## About project structure
-
-* tasks.py - entry point
-* config.settings.py - public project settings
-* config.local_settings.py - hidden project settings
-* tmp - directory for logs and other temp files
-
+## Run in Docker
+    1. Create file `config.docker.yml` with the content similar to `config.sample.yml`
+    2. Change connection urls according to the Docker services (ex: ~~localhost:27017~~ `mongodb:27017`)
+    3. Run `docker-compose up --build`
+    
 ## Default structure of file with tasks
 ```yaml
       
     tasks:
+      HelloWorld:
         # task name
-        - name: "Check last telegram post date"
+        name: "Hello World"
+
+        # string for scheduling in crontab-like syntax (see https://crontab.guru).
+        schedule: "* * * * *" # minute, hour, day, month, day_of_week
+
+        # scenario type
+        scenario: "hello_world"
+
+        # transport type
+        transport: "stdout"
+  
+    TelegramPostChecker:
+        # task name
+        - name: "TelegramPostChecker"
         
         # string for scheduling in crontab-like syntax (see https://crontab.guru).
         schedule: "29 13-20 * * 1-5"
@@ -26,7 +34,7 @@ The main idea of this project is an increasing of projects performance inside of
         # scenario type
         scenario: "xpath"
         
-        # path to file wuth messages list to be send
+        # path to file with messages list to be send
         messages: "./messages.yml"
         
         # page that will be parsed
@@ -46,16 +54,16 @@ The main idea of this project is an increasing of projects performance inside of
             notifier: "Work Email"
             time: 40000
 
-    notifiers:
-        - name: "Telegram"
-        type: "telegram"
-        webhook: "https://notify.bot.codex.so/u/R4ND0M"
-        - name: "Work Email"
-        type: "email"
-        address: "work@me.ru"
-```
+    
+    # database settings section (optional)
+    database:
+        # hostname or IP address of a MongoDB instance to connect to
+        # see <https://api.mongodb.com/python/current/api/pymongo/mongo_client.html>
+        host: "mongodb"
 
-## Run in Docker
-1. Create file `config.docker.yml` with the content similar to `config.sample.yml`
-2. Change connection urls according to the Docker services (ex: ~~localhost:27017~~ `mongodb:27017`)
-3. Run `docker-compose up --build`
+        # port of a MongoDB instance
+        port: 27017
+
+        # name of the database
+        name: "manager"
+```
