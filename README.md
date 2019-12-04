@@ -36,4 +36,19 @@ The main idea of this project is an increasing of projects performance inside of
 
         # name of the database
         name: "manager"
+
+    # proxy for performing tasks; tor proxy config
+    proxy:
+        # protocol of proxy
+        protocol: "socks5"
+
+        # host of proxy
+        host: "localhost"
+
+        # port of proxy
+        port: 9050
+
+        # username: "u53r14"
+
+        # password: "p455w0rd88"
 ```
