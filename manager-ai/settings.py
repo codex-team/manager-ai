@@ -68,6 +68,7 @@ if path.exists(CONFIG_FILE_PATH):
         try:
             config_dict = safe_load(config_file.read())
             db_config_dict = config_dict.get('database')
+            PROXY = config_dict.get('proxy')
 
             if db_config_dict:
                 if db_config_dict.get('host'):
